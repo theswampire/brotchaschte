@@ -37,6 +37,7 @@ tasks:
       CGO_ENABLED: 1
       #GOOS: linux
     cmds:
+      - sqlc generate
       - go build -o {{.EXECUTABLE_FILE}} {{.BUILD_FLAGS}} cmd/server/main.go
     generates:
       - '{{.EXECUTABLE_FILE}}'

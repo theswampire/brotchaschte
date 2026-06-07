@@ -1,11 +1,11 @@
 package database
 
 import (
+	query "brotchaschte2/internal/database/generated"
 	"context"
 	"database/sql"
 	"fmt"
 	"log"
-	"os"
 	"strconv"
 	"time"
 
@@ -22,14 +22,18 @@ type Service interface {
 	// Close terminates the database connection.
 	// It returns an error if the connection cannot be closed.
 	Close() error
+
+	Queries() *query.Queries
+	DB() *sql.DB
 }
 
 type service struct {
-	db *sql.DB
+	db      *sql.DB
+	queries *query.Queries
 }
 
 var (
-	dburl      = os.Getenv("BROTCHASCHTE_DB_URL")
+	dburl      = "data.db" //os.Getenv("BLUEPRINT_DB_URL")
 	dbInstance *service
 )
 
@@ -46,10 +50,19 @@ func New() Service {
 		log.Fatal(err)
 	}
 
+	migrate(db)
+
 	dbInstance = &service{
-		db: db,
+		db:      db,
+		queries: query.New(db),
 	}
 	return dbInstance
+}
+func (s *service) DB() *sql.DB {
+	return s.db
+}
+func (s *service) Queries() *query.Queries {
+	return s.queries
 }
 
 // Health checks the health of the database connection by pinging the database.
