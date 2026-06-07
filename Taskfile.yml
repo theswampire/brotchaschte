@@ -1,0 +1,108 @@
+version: "3"
+
+vars:
+  ALLOWED_FRONTEND: [ bundle, proxy ]
+  EXECUTABLE_FILE: main
+
+tasks:
+  default:
+    cmds:
+      - task: run-dev
+
+  install-deps-frontend:
+    dir: frontend
+    run: once
+    cmds:
+      - pnpm install --frozen-lockfile
+    
+
+  build-frontend:
+    deps: [ install-deps-frontend ]
+    dir: frontend
+    cmds:
+      - pnpm build
+
+  serve-frontend:
+    dir: frontend
+    cmds:
+      - pnpm dev
+
+
+
+  build-backend:
+    requires:
+      vars:
+        - name: BUILD_FLAGS
+    env:
+      CGO_ENABLED: 1
+      #GOOS: linux
+    cmds:
+      - go build -o {{.EXECUTABLE_FILE}} {{.BUILD_FLAGS}} cmd/server/main.go
+    generates:
+      - '{{.EXECUTABLE_FILE}}'
+
+  build-bundled-backend:
+    internal: true
+    cmds:
+      - task: build-backend
+        vars: { BUILD_FLAGS: "--tags=bundle" }
+
+  build-proxied-backend:
+    internal: true
+    cmds:
+      - task: build-backend
+        vars: { BUILD_FLAGS: "" }
+
+  _build-backend:
+    requires:
+      vars:
+        - name: FRONTEND
+          enum: 
+            ref: .ALLOWED_FRONTEND
+    vars:
+      FRONTEND: '{{default "not defined" .FRONTEND}}'
+    cmds:
+      - task: build-bundled-backend
+        if: '{{ eq .FRONTEND "bundle" }}'
+      - task: build-proxied-backend
+        if: '{{ eq .FRONTEND "proxy" }}'
+
+
+  build:
+    deps: [ build-frontend ] 
+    cmds:
+      - task: _build-backend
+        vars: { FRONTEND: 'bundle' }
+
+
+  build-dev:
+    cmds:
+      - task: _build-backend
+        vars: { FRONTEND: 'proxy' }
+        
+
+  run-dev:
+    deps: [ build-dev ]
+    cmds:
+      - ./{{.EXECUTABLE_FILE}}
+
+
+
+  watch:
+    cmds:
+      - air
+
+  run-dev:
+    deps: [ watch, serve-frontend ]
+    cmds:
+      - echo "done"
+
+  test:
+    cmds:
+      - go test ./... -v
+
+  clean:
+    cmds:
+      - rm -f main
+      - rm -f frontend/dist
+
