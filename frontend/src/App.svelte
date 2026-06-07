@@ -26,7 +26,7 @@
 	</div>
 
 	<div>
-		<h1>Get started</h1>
+		<h1>Get started hehe</h1>
 
 		<p>
 			Edit 
