@@ -104,5 +104,6 @@ tasks:
   clean:
     cmds:
       - rm -f main
-      - rm -f frontend/dist
+      - rm -rf frontend/dist
+      - rm -rf tmp
 
