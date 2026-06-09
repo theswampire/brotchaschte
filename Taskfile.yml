@@ -7,7 +7,7 @@ vars:
 tasks:
   default:
     cmds:
-      - task: run-dev
+      - task: dev
 
   install-deps-frontend:
     dir: frontend
@@ -23,6 +23,7 @@ tasks:
       - pnpm build
 
   serve-frontend:
+    desc: Watch and serve frontend
     dir: frontend
     cmds:
       - pnpm dev
@@ -70,6 +71,7 @@ tasks:
 
 
   build:
+    desc: Build backend in bundled mode
     deps: [ build-frontend ] 
     cmds:
       - task: _build-backend
@@ -77,12 +79,14 @@ tasks:
 
 
   build-dev:
+    desc: Build backend in proxy mode
     cmds:
       - task: _build-backend
         vars: { FRONTEND: 'proxy' }
         
 
   run-dev:
+    desc: Runs backend after building in proxy mode
     deps: [ build-dev ]
     cmds:
       - ./{{.EXECUTABLE_FILE}}
@@ -90,10 +94,12 @@ tasks:
 
 
   watch:
+    desc: Watch backend
     cmds:
       - air
 
-  run-dev:
+  dev:
+    desc: Run and watch both backend and frontend 
     deps: [ watch, serve-frontend ]
     cmds:
       - echo "done"
