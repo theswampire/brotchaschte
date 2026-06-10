@@ -10,8 +10,6 @@ import (
 )
 
 func RegisterFrontend(e *echo.Echo) {
-	// don't do anything
-
 	upstream, _ := url.Parse("http://localhost:5173")
 	proxy := middleware.ProxyWithConfig(middleware.ProxyConfig{
 		Balancer: middleware.NewRoundRobinBalancer([]*middleware.ProxyTarget{
