@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { navigate } from "sv-router/generated";
     import { type AuthContext, setAuthContext } from "./auth.svelte";
     import { createQuery } from "@tanstack/svelte-query";
 
@@ -9,6 +10,9 @@
         console.log(
             `user is now: ${authctx.is_authenticated ? "authenticated" : "unauthenticated"}`,
         );
+        if (!authctx.is_authenticated) {
+            navigate("/login");
+        }
     });
 
     const query = createQuery(() => ({

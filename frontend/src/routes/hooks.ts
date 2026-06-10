@@ -14,7 +14,9 @@ export default {
 
 		console.log("unauthenticated");
 
-		throw navigate("/login");
+		const sp = new URLSearchParams();
+		sp.append("callback", ctx.pathname);
+		throw navigate("/login", { search: sp.toString() });
 	},
 	afterLoad() {
 		// Execute after route loads
