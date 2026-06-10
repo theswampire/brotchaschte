@@ -4,7 +4,7 @@ tmp_dir = "tmp"
 
 [build]
   args_bin = []
-  bin = "./main"
+  entrypoint = "./main"
   cmd = "task build-dev"
   delay = 500
   exclude_dir = ["assets", "tmp", "vendor", "testdata", "frontend/node_modules", "frontend" , "internal/database/generated"]
