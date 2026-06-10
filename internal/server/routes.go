@@ -10,11 +10,24 @@ import (
 
 func (s *Server) RegisterRoutes() http.Handler {
 	e := echo.New()
-	e.Use(middleware.RequestLogger())
-	e.GET("/api", func(c *echo.Context) error {
+	e.Pre(middleware.RemoveTrailingSlash())
+
+	e.Use(s.loadAndSaveHttpSession)
+	e.GET("/api", s.requireSession(func(c *echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
-	})
+	}))
+	s.registerApiV1Routes(e)
+
 	frontend.RegisterFrontend(e)
 	return e
 
+}
+
+func (s *Server) registerApiV1Routes(e *echo.Echo) {
+	router := e.Group("/api/v1")
+
+	auth := router.Group("/auth")
+	auth.POST("/login", s.loginHandler)
+	auth.Any("/logout", s.logoutHandler)
+	auth.Any("/check", s.checkAuthenticatedHandler)
 }

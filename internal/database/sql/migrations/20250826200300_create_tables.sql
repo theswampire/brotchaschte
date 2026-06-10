@@ -53,6 +53,19 @@ CREATE TABLE avz(
   ZIP_LABEL TEXT NOT NULL,
    PRIMARY KEY(STN_LABEL,ADR_NUMBER,ZIP_LABEL)
 );
+
+CREATE TABLE user(
+  email TEXT NOT NULL,
+  password_hash TEXT NOT NULL,
+  PRIMARY KEY(email)
+);
+
+CREATE TABLE sessions (
+	token TEXT PRIMARY KEY,
+	data BLOB NOT NULL,
+	expiry REAL NOT NULL
+);
+CREATE INDEX sessions_expiry_idx ON sessions(expiry);
 -- +goose StatementEnd
 
 -- +goose Down
@@ -63,5 +76,8 @@ DROP TABLE geocode_errors;
 DROP TABLE delivery;
 DROP TABLE delivery_orders;
 DROP TABLE avz;
+DROP TABLE user;
+DROP TABLE sessions;
+DROP INDEX sessions_expiry_idx;
 -- +goose StatementEnd
 

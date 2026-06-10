@@ -62,3 +62,14 @@ type RawOrder struct {
 	Ordermethod    sql.NullString
 	Vendorgroup    sql.NullString
 }
+
+type Session struct {
+	Token  string
+	Data   []byte
+	Expiry float64
+}
+
+type User struct {
+	Email        string
+	PasswordHash string
+}
