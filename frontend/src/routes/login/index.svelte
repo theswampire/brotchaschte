@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { createMutation } from "@tanstack/svelte-query";
-	import { auth } from "@/lib/auth.svelte";
 	import type { Path } from "sv-router";
-	import { navigate, route, type Routes } from "sv-router/generated";
+	import { navigate, type Routes, route } from "sv-router/generated";
+	import { auth } from "@/lib/auth.svelte";
 
 	let callback_url = route.search.callback;
 

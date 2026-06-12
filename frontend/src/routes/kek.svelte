@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { api } from "@/lib/api/api";
 	import { createQuery } from "@tanstack/svelte-query";
+	import { api } from "@/lib/api/api";
 
 	console.log("kek page");
 	const query = createQuery(() => ({

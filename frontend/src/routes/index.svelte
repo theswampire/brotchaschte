@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { auth } from "@/lib/auth.svelte";
 	import { createMutation } from "@tanstack/svelte-query";
 	import { p } from "sv-router/generated";
+	import { auth } from "@/lib/auth.svelte";
 
 	console.log("Home");
 

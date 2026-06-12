@@ -2,7 +2,7 @@
     import "./app.css";
     import { Router } from "sv-router";
     import "sv-router/generated";
-    import { QueryClientProvider, QueryClient } from "@tanstack/svelte-query";
+    import { QueryClient, QueryClientProvider } from "@tanstack/svelte-query";
     import AuthProvider from "./lib/AuthProvider.svelte";
     import ApiClientProvider from "./lib/api/ApiClientProvider.svelte";
 

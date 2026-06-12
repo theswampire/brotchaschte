@@ -1,5 +1,6 @@
 <script lang="ts">
-    import { navigate } from "sv-router/generated";
+    import { createQuery } from "@tanstack/svelte-query";
+    import { registerAuthCallbacks } from "./api/axios";
     import {
         type AuthContext,
         auth,
@@ -7,8 +8,6 @@
         navigateToLoginWithCallback,
         setAuthContext,
     } from "./auth.svelte";
-    import { createQuery } from "@tanstack/svelte-query";
-    import { registerAuthCallbacks } from "./api/axios";
     import { getCookie } from "./cookie";
 
     const initial_authctx: AuthContext = {
