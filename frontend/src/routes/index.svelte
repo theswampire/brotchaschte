@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { getAuthContext } from "@/lib/auth.svelte";
+	import { auth } from "@/lib/auth.svelte";
 	import { createMutation } from "@tanstack/svelte-query";
+	import { p } from "sv-router/generated";
 
 	console.log("Home");
-	const authctx = getAuthContext();
 
 	const logoutMutation = createMutation(() => ({
 		async mutationFn() {
@@ -12,7 +12,7 @@
 				console.error(response.statusText);
 				console.error(await response.text());
 			}
-			authctx.is_authenticated = false;
+			auth.setUnauthenticated();
 		},
 	}));
 
@@ -23,6 +23,10 @@
 
 <section>
 	Home
+
+	<a href={p("/kek")}>Kek</a>
+	<a href={p("/")}>Home</a>
+	<a href={p("/login")}>Login</a>
 
 	<button
 		disabled={logoutMutation.isPending}

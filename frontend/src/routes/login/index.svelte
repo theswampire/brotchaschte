@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createMutation } from "@tanstack/svelte-query";
-	import { getAuthContext } from "@/lib/auth.svelte";
+	import { auth } from "@/lib/auth.svelte";
 	import type { Path } from "sv-router";
 	import { navigate, route, type Routes } from "sv-router/generated";
 
@@ -12,10 +12,9 @@
 	console.log(callback_url);
 
 	const callback = new URL(`thismessage:${callback_url}`);
-	const authctx = getAuthContext();
 
 	$effect(() => {
-		if (authctx.is_authenticated) {
+		if (auth.isAuthenticated()) {
 			navigate(callback.pathname as Path<Routes>, {
 				search: callback.search,
 				hash: callback.hash,
@@ -32,7 +31,7 @@
 			if (!response.ok) {
 				throw new Error("Anmeldung fehlgeschlagen");
 			}
-			authctx.is_authenticated = true;
+			auth.setAuthenticated("not implemented");
 			navigate(callback.pathname as Path<Routes>, {
 				search: callback.search,
 				hash: callback.hash,
@@ -60,7 +59,7 @@
 	<div>
 		<form
 			class="border-gray-300 border rounded-sm p-3 w-fit mx-auto bg-gray-50 mt-10 shadow"
-			on:submit={handleSubmit}
+			onsubmit={handleSubmit}
 		>
 			<label
 				for="email"

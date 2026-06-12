@@ -13,6 +13,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	e.Pre(middleware.RemoveTrailingSlash())
 
 	e.Use(s.loadAndSaveHttpSession)
+	e.Use(s.addAuthCookie)
 	e.GET("/api", s.requireSession(func(c *echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	}))
@@ -30,4 +31,8 @@ func (s *Server) registerApiV1Routes(e *echo.Echo) {
 	auth.POST("/login", s.loginHandler)
 	auth.Any("/logout", s.logoutHandler)
 	auth.Any("/check", s.checkAuthenticatedHandler)
+
+	kek := router.Group("/kek")
+	kek.Use(s.requireSession)
+	kek.Any("/", s.kekHandler)
 }

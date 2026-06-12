@@ -1,6 +1,5 @@
 import type { Hooks } from "sv-router";
-import { navigate } from "sv-router/generated";
-import { isAuthenticated } from "@/lib/auth.svelte";
+import { auth, navigateToLoginWithCallback } from "@/lib/auth.svelte";
 
 export default {
 	beforeLoad(ctx) {
@@ -10,13 +9,11 @@ export default {
 
 		console.log("check auth");
 
-		if (isAuthenticated()) return;
+		if (auth.isAuthenticated()) return;
 
 		console.log("unauthenticated");
 
-		const sp = new URLSearchParams();
-		sp.append("callback", ctx.pathname);
-		throw navigate("/login", { search: sp.toString() });
+		throw navigateToLoginWithCallback(ctx.pathname);
 	},
 	afterLoad() {
 		// Execute after route loads

@@ -1,9 +1,33 @@
 <script lang="ts">
     import { navigate } from "sv-router/generated";
-    import { type AuthContext, setAuthContext } from "./auth.svelte";
+    import {
+        type AuthContext,
+        auth,
+        initAuthStuff,
+        navigateToLoginWithCallback,
+        setAuthContext,
+    } from "./auth.svelte";
     import { createQuery } from "@tanstack/svelte-query";
+    import { registerAuthCallbacks } from "./api/axios";
+    import { getCookie } from "./cookie";
 
-    let authctx = $state<AuthContext>({ is_authenticated: false, user: null });
+    const initial_authctx: AuthContext = {
+        is_authenticated: false,
+        user: null,
+    };
+
+    const authcookie = getCookie("authsession");
+    if (authcookie) {
+        console.log(`cookie: ${authcookie}`);
+        if (authcookie.startsWith('"authenticated,')) {
+            const email = atob(authcookie.substring(15, authcookie.length - 1));
+            console.log(`\t- ${email}`);
+            initial_authctx.is_authenticated = true;
+            initial_authctx.user = email;
+        }
+    }
+    let authctx = $state<AuthContext>(initial_authctx);
+
     setAuthContext(authctx);
     let { children } = $props();
     $effect(() => {
@@ -11,7 +35,7 @@
             `user is now: ${authctx.is_authenticated ? "authenticated" : "unauthenticated"}`,
         );
         if (!authctx.is_authenticated) {
-            navigate("/login");
+            navigateToLoginWithCallback(location.pathname);
         }
     });
 
@@ -23,6 +47,9 @@
             return await response.text();
         },
     }));
+
+    initAuthStuff();
+    registerAuthCallbacks({ logout: auth.setUnauthenticated });
 </script>
 
 {#if query.isPending}
