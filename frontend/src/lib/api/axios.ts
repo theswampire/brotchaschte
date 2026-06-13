@@ -9,14 +9,18 @@ const callbacks = {
 };
 
 export function initApiClient() {
+	console.log("register intercepts");
 	apiV1client.interceptors.response.use(
 		(config) => config,
 		(error) => {
-			// HTTP Status 401 Unauthorized
-			if (error.code === 401) {
-				console.log("api intercepted: unauthenticated");
-				callbacks.logout();
+			if (axios.isAxiosError(error)) {
+				// HTTP Status 401 Unauthorized
+				if (error.status === 401) {
+					console.log("api intercepted res: unauthenticated");
+					callbacks.logout();
+				}
 			}
+			throw error;
 		},
 	);
 }

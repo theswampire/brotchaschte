@@ -1,8 +1,12 @@
 <script lang="ts">
 	import { createMutation } from "@tanstack/svelte-query";
+	import axios from "axios";
 	import type { Path } from "sv-router";
 	import { navigate, type Routes, route } from "sv-router/generated";
-	import { auth } from "@/lib/auth.svelte";
+	import type { LoginRes } from "@/lib/api/auth";
+	import { apiV1client } from "@/lib/api/axios";
+	import { auth, getAuthContext } from "@/lib/auth.svelte";
+	import { api } from "@/lib/api/api";
 
 	let callback_url = route.search.callback;
 
@@ -12,9 +16,10 @@
 	console.log(callback_url);
 
 	const callback = new URL(`thismessage:${callback_url}`);
+	const authctx = getAuthContext();
 
 	$effect(() => {
-		if (auth.isAuthenticated()) {
+		if (authctx.is_authenticated) {
 			navigate(callback.pathname as Path<Routes>, {
 				search: callback.search,
 				hash: callback.hash,
@@ -23,25 +28,13 @@
 	});
 
 	const submitMutation = createMutation(() => ({
-		async mutationFn(formData: FormData) {
-			const response = await fetch("/api/v1/auth/login", {
-				method: "POST",
-				body: formData,
-			});
-			if (!response.ok) {
-				throw new Error("Anmeldung fehlgeschlagen");
-			}
-			auth.setAuthenticated("not implemented");
+		mutationFn: api.auth.login,
+		onSuccess(data) {
+			auth.setAuthenticated(data.data.email);
 			navigate(callback.pathname as Path<Routes>, {
 				search: callback.search,
 				hash: callback.hash,
 			});
-		},
-		async onSuccess(data, variables, onMutateResult, context) {
-			console.log("yess");
-		},
-		onError(error, variables, onMutateResult, context) {
-			console.log("grrr");
 		},
 	}));
 
@@ -91,8 +84,11 @@
 				Login
 			</button>
 		</form>
-		{#if submitMutation.isError}
-			<p>{submitMutation.error.message}</p>
+		{#if submitMutation.isError && axios.isAxiosError(submitMutation.error)}
+			<p>{submitMutation.error.response?.data.error}</p>
+		{/if}
+		{#if submitMutation.isError && !axios.isAxiosError(submitMutation.error)}
+			<p>{submitMutation.error}</p>
 		{/if}
 	</div>
 </section>

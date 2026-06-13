@@ -28,6 +28,8 @@
 	<a href={p("/")}>Home</a>
 	<a href={p("/login")}>Login</a>
 
+	<p>User: {auth.getUser()}</p>
+
 	<button
 		disabled={logoutMutation.isPending}
 		class="border rounded p-1 border-gray-200 shadow hover:shadow-none transition-shadow"

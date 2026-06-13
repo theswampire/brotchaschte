@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/base64"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -10,27 +11,34 @@ import (
 	"github.com/labstack/echo/v5"
 )
 
+type LoginResponse struct {
+	Ok    bool   `json:"ok"`
+	Email string `json:"email"`
+	Error string `json:"error"`
+}
+
 // loginHandler is the api handler for the login flow
 func (s *Server) loginHandler(c *echo.Context) error {
 	email := c.FormValue("email")
 	password := c.FormValue("password")
 	ok, err := s.auth.AuthenticateUser(c.Request().Context(), email, password)
 	if err != nil {
-		return c.String(http.StatusInternalServerError, "ein Fehler ist aufgetreten")
+		return JSON(c, http.StatusInternalServerError, &LoginResponse{Ok: false, Error: "ein Fehler ist aufgetreten", Email: ""})
 	}
 	if !ok {
-		return c.String(http.StatusUnauthorized, "invalid email or password")
+		return JSON(c, http.StatusUnauthorized, &LoginResponse{Ok: false, Error: "ungültige Anmeldedaten"})
 	}
 
 	sessionManager := s.auth.SessionManager()
 
 	// Regenerate the session token to prevent session fixation
 	if err := sessionManager.RenewToken(c.Request().Context()); err != nil {
-		return c.String(http.StatusInternalServerError, "session error")
+		log.Printf("failed to renew session in login: %s\n", err.Error())
+		return JSON(c, http.StatusInternalServerError, &LoginResponse{Ok: false, Error: "ein Fehler ist aufgetreten: Session konnte nicht erneuert werden."})
 	}
 
 	sessionManager.Put(c.Request().Context(), "email", email)
-	return c.String(http.StatusOK, "logged in")
+	return JSON(c, http.StatusOK, &LoginResponse{Ok: true, Email: email})
 }
 
 // logoutHandler is the api handler for the logout flow
@@ -42,7 +50,7 @@ func (s *Server) logoutHandler(c *echo.Context) error {
 	cookie.Path = "/"
 	c.SetCookie(cookie)
 	if err := sessionManager.Destroy(c.Request().Context()); err != nil {
-		return c.String(http.StatusInternalServerError, "logout failed")
+		return c.String(http.StatusInternalServerError, "logout fehlgeschlagen")
 	}
 	return c.NoContent(http.StatusOK)
 }

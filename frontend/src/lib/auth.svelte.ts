@@ -19,10 +19,15 @@ export const auth = {
 	setUnauthenticated: () => {
 		console.log("auth not initialized");
 	},
+	getUser: () => {
+		console.log("auth not initialized");
+		return null as AuthContext["user"];
+	},
 };
 
 export function initAuthStuff() {
 	const authctx = getAuthContext();
+
 	const isAuthenticated = () => {
 		return authctx.is_authenticated;
 	};
@@ -33,10 +38,14 @@ export function initAuthStuff() {
 	const setUnauthenticated = () => {
 		authctx.is_authenticated = false;
 	};
+	const getUser = () => {
+		return authctx.user;
+	};
 
 	auth.isAuthenticated = isAuthenticated;
 	auth.setAuthenticated = setAuthenticated;
 	auth.setUnauthenticated = setUnauthenticated;
+	auth.getUser = getUser;
 }
 
 export function navigateToLoginWithCallback(current: string) {
