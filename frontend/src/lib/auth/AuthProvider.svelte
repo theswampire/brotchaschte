@@ -1,6 +1,7 @@
 <script lang="ts">
     import { createQuery } from "@tanstack/svelte-query";
-    import { registerAuthCallbacks } from "./api/axios";
+    import { registerAuthCallbacks } from "@/lib/api/axios";
+    import { getCookie } from "@/lib/cookie";
     import {
         type AuthContext,
         auth,
@@ -8,7 +9,6 @@
         navigateToLoginWithCallback,
         setAuthContext,
     } from "./auth.svelte";
-    import { getCookie } from "./cookie";
 
     const initial_authctx: AuthContext = {
         is_authenticated: false,

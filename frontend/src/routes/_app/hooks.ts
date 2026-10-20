@@ -1,5 +1,5 @@
 import type { Hooks } from "sv-router";
-import { auth, navigateToLoginWithCallback } from "@/lib/auth.svelte";
+import { auth, navigateToLoginWithCallback } from "@/lib/auth/auth.svelte";
 
 export default {
 	beforeLoad(ctx) {

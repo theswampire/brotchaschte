@@ -9,3 +9,7 @@ export type LoginRes = {
 export function login(creds: FormData) {
 	return apiV1client.post<LoginRes>("/api/v1/auth/login", creds);
 }
+
+export function logout() {
+	return apiV1client.post("/api/v1/auth/logout");
+}

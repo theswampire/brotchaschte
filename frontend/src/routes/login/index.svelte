@@ -3,10 +3,8 @@
 	import axios from "axios";
 	import type { Path } from "sv-router";
 	import { navigate, type Routes, route } from "sv-router/generated";
-	import type { LoginRes } from "@/lib/api/auth";
-	import { apiV1client } from "@/lib/api/axios";
-	import { auth, getAuthContext } from "@/lib/auth.svelte";
 	import { api } from "@/lib/api/api";
+	import { auth, getAuthContext } from "@/lib/auth/auth.svelte";
 
 	let callback_url = route.search.callback;
 

@@ -10,4 +10,8 @@ export default defineConfig({
 	resolve: {
 		tsconfigPaths: true,
 	},
+	// -----
+	// workaround: https://github.com/MIERUNE/svelte-maplibre-gl/issues/206
+	optimizeDeps: { exclude: ['maplibre-gl'] }
+	// ----
 });
