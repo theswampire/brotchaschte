@@ -22,9 +22,12 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+type email = string
+
 type AuthService interface {
 	SessionManager() *scs.SessionManager
 	AuthenticateUser(ctx context.Context, email, password string) (bool, error)
+	GetUser(ctx context.Context) email
 }
 
 type authservice struct {
@@ -101,6 +104,12 @@ func (s *authservice) AuthenticateUser(ctx context.Context, email, password stri
 		return false, err
 	}
 	return ok, nil
+}
+
+// GetUser returns the current user of this session. Currently the user consists only of email
+func (s *authservice) GetUser(ctx context.Context) email {
+	email_str := s.SessionManager().GetString(ctx, "email")
+	return email(email_str)
 }
 
 func (s *authservice) CreateUser(ctx context.Context, email, password string) error {

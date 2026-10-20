@@ -34,5 +34,5 @@ func (s *Server) registerApiV1Routes(e *echo.Echo) {
 
 	kek := router.Group("/kek")
 	kek.Use(s.requireSession)
-	kek.Any("/", s.kekHandler)
+	kek.Any("", s.kekHandler)
 }

@@ -57,13 +57,8 @@ func (s *Server) logoutHandler(c *echo.Context) error {
 
 // checkAuthenticatedHandler is the api handler to check if one is authenticated
 func (s *Server) checkAuthenticatedHandler(c *echo.Context) error {
-	// renew session
-	sessionManager := s.auth.SessionManager()
-	if err := sessionManager.RenewToken(c.Request().Context()); err != nil {
-		return c.String(http.StatusInternalServerError, "session error")
-	}
 	// check if valid
-	email := sessionManager.GetString(c.Request().Context(), "email")
+	email := s.auth.GetUser(c.Request().Context())
 	if email == "" {
 		return c.String(http.StatusUnauthorized, "not authenticated")
 	}
@@ -76,7 +71,7 @@ func (s *Server) addAuthCookie(next echo.HandlerFunc) echo.HandlerFunc {
 		need_set := false
 		need_update := false
 
-		email := s.auth.SessionManager().GetString(c.Request().Context(), "email")
+		email := s.auth.GetUser(c.Request().Context())
 		is_authed := email != ""
 
 		old_cookie, err := c.Cookie("authsession")
@@ -129,7 +124,7 @@ func (s *Server) addAuthCookie(next echo.HandlerFunc) echo.HandlerFunc {
 // requireSession is a middleware to guard api endpoints. It check if a valid session exists.
 func (s *Server) requireSession(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c *echo.Context) error {
-		email := s.auth.SessionManager().GetString(c.Request().Context(), "email")
+		email := s.auth.GetUser(c.Request().Context())
 		if email == "" {
 			return c.String(http.StatusUnauthorized, "not authenticated")
 		}
