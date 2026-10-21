@@ -9,7 +9,7 @@
 <nav class="w-full">
 	<div class="flex mx-auto max-w-2xl gap-10 p-3 items-center">
 		<a href={p("/")}>Karte</a>
-		<a href={p("/")}>Bestellungen</a>
+		<a href={p("/orders")}>Bestellungen</a>
 		<LogoutButton />
 	</div>
 </nav>

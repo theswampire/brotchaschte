@@ -35,4 +35,9 @@ func (s *Server) registerApiV1Routes(e *echo.Echo) {
 	kek := router.Group("/kek")
 	kek.Use(s.requireSession)
 	kek.Any("", s.kekHandler)
+
+	orders := router.Group("/orders")
+	orders.Use(s.requireSession)
+	orders.GET("", s.getOrdersHandler)
+	orders.POST("/generate", s.generateRandomOrdersHandler)
 }
