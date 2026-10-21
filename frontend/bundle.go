@@ -21,5 +21,6 @@ func RegisterFrontend(e *echo.Echo) {
 		Root:   ".",
 		Browse: false,
 		HTML5:  true,
+		Filesystem: e.Filesystem, // whyy, docs say default will be set to e.Filesystem!!! without it it panics
 	}))
 }
