@@ -100,8 +100,14 @@ func (g *GeocodeStore) GetFailedGeocodeAttempts(ctx context.Context) ([]query.Ge
 func (g *GeocodeStore) GetFailedGeocodeOrders(ctx context.Context) ([]query.GetFailedGeocodeOrdersRow, error) {
 	return g.queries.GetFailedGeocodeOrders(ctx)
 }
-func (g *GeocodeStore) GetNotGeocoded(ctx context.Context) ([]query.GetNotGeocodedOrdersIncludeFailedRow, error) {
+func (g *GeocodeStore) GetNotGeocodedIncludeFailed(ctx context.Context) ([]query.GetNotGeocodedOrdersIncludeFailedRow, error) {
 	return g.queries.GetNotGeocodedOrdersIncludeFailed(ctx)
+}
+func (g *GeocodeStore) GetNotGeocodedExcludeFailed(ctx context.Context) ([]query.RawOrder, error) {
+	return g.queries.GetNotGeocodedOrdersExcludeFailed(ctx)
+}
+func (g *GeocodeStore) GetGeocodedOrders(ctx context.Context) ([]query.GetGeocodedOrdersRow, error) {
+	return g.queries.GetGeocodedOrders(ctx)
 }
 
 func (g *GeocodeStore) UpdateAddress(ctx context.Context, order_id, address, zip, city string) (query.RawOrder, error) {

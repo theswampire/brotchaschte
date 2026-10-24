@@ -201,6 +201,76 @@ func (q *Queries) GetFailedGeocodes(ctx context.Context) ([]GeocodeError, error)
 	return items, nil
 }
 
+const getGeocodedOrders = `-- name: GetGeocodedOrders :many
+SELECT id, lastname, firstname, phonenumber, email, amountsizes, amountsizem, amountsizel, address, city, postalcode, deliverymethod, remarks, ordermethod, vendorgroup, order_id, x, y, label FROM raw_orders
+JOIN order_coordinates ON raw_orders.id = order_coordinates.order_id
+`
+
+type GetGeocodedOrdersRow struct {
+	ID             string
+	Lastname       string
+	Firstname      string
+	Phonenumber    string
+	Email          string
+	Amountsizes    int64
+	Amountsizem    int64
+	Amountsizel    int64
+	Address        string
+	City           string
+	Postalcode     string
+	Deliverymethod string
+	Remarks        sql.NullString
+	Ordermethod    sql.NullString
+	Vendorgroup    sql.NullString
+	OrderID        string
+	X              float64
+	Y              float64
+	Label          string
+}
+
+func (q *Queries) GetGeocodedOrders(ctx context.Context) ([]GetGeocodedOrdersRow, error) {
+	rows, err := q.db.QueryContext(ctx, getGeocodedOrders)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetGeocodedOrdersRow
+	for rows.Next() {
+		var i GetGeocodedOrdersRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Lastname,
+			&i.Firstname,
+			&i.Phonenumber,
+			&i.Email,
+			&i.Amountsizes,
+			&i.Amountsizem,
+			&i.Amountsizel,
+			&i.Address,
+			&i.City,
+			&i.Postalcode,
+			&i.Deliverymethod,
+			&i.Remarks,
+			&i.Ordermethod,
+			&i.Vendorgroup,
+			&i.OrderID,
+			&i.X,
+			&i.Y,
+			&i.Label,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getNotGeocodedOrdersExcludeFailed = `-- name: GetNotGeocodedOrdersExcludeFailed :many
 SELECT id, lastname, firstname, phonenumber, email, amountsizes, amountsizem, amountsizel, address, city, postalcode, deliverymethod, remarks, ordermethod, vendorgroup FROM raw_orders
 WHERE id NOT IN (

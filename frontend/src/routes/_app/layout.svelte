@@ -7,11 +7,12 @@
 </script>
 
 <nav class="w-full">
-	<div class="flex mx-auto max-w-2xl gap-10 p-3 items-center">
+	<!--
+	<div class="flex mx-auto max-w-2xl w-full gap-10 p-3 items-center justify-between">
 		<a href={p("/")}>Karte</a>
-		<a href={p("/orders")}>Bestellungen</a>
 		<LogoutButton />
 	</div>
+	-->
 </nav>
 <div class="wrapper">
 	{@render children()}

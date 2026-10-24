@@ -22,6 +22,10 @@ WHERE id NOT IN (
     SELECT order_id AS id  FROM geocode_errors
 );
 
+-- name: GetGeocodedOrders :many
+SELECT * FROM raw_orders
+JOIN order_coordinates ON raw_orders.id = order_coordinates.order_id;
+
 -- name: CreateGeocodeError :exec
 INSERT INTO geocode_errors(order_id, message) VALUES (?1, ?2)
     ON CONFLICT(order_id)

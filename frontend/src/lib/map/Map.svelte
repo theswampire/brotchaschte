@@ -3,9 +3,7 @@
     import { MapLibre, Marker } from "svelte-maplibre-gl";
     import { type Coords, toLngLat } from "@/lib/map/coords";
     import { STANDARD_COLORS } from "@/lib/map/marker";
-    import type { Map, StyleSpecification } from "maplibre-gl";
-
-    interface Props {}
+    import type { Map as MapMap, StyleSpecification } from "maplibre-gl";
 
     const MAPLIBRE_URL =
         "https://vectortiles.geo.admin.ch/styles/ch.swisstopo.basemap.vt/style.json";
@@ -30,14 +28,14 @@
         return style;
     }
     const style = await getStyle();
-    let map: Map | undefined = $state(undefined);
+    let map: MapMap | undefined = $state(undefined);
     const MAT_COORDS: Coords = [2699530.88, 1262572.69];
 </script>
 
 <MapLibre
     bind:map
     center={toLngLat(MAT_COORDS)}
-    class="h-[calc(100vh-6em)]"
+    class="h-[calc(100vh-6em)] z-0"
     {style}
     zoom={14}
 >

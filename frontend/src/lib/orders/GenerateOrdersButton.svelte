@@ -1,8 +1,8 @@
 <script lang="ts">
     import { createMutation, useQueryClient } from "@tanstack/svelte-query";
+    import { isAxiosError } from "axios";
     import { api } from "@/lib/api/api";
     import type { GetOrdersRes } from "../api/orders";
-    import { isAxiosError } from "axios";
 
     const queryClient = useQueryClient();
     const generateOrdersMutation = createMutation(() => ({
