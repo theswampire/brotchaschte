@@ -23,7 +23,7 @@ func New() DeliveryStore {
 	}
 }
 
-// GetOrderCoordinates  retrieves all orders with their coordinates.
+// GetOrderCoordinates retrieves all orders with their coordinates.
 // The result is sorted in ascending order of the northing coordinate. This prevents overlapping markers in the map
 func (d *DeliveryStore) GetOrderCoordinates(ctx context.Context) ([]query.GetOrderCoordinatesRow, error) {
 	return d.queries.GetOrderCoordinates(ctx)

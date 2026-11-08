@@ -6,6 +6,7 @@
 		queryKey: ["orders"],
 		queryFn: api.orders.getOrders,
 	}));
+	// TODO: edit orders and manually geocode them
 </script>
 
 {#if query.isPending}
