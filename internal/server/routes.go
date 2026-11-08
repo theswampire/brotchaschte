@@ -42,4 +42,5 @@ func (s *Server) registerApiV1Routes(e *echo.Echo) {
 	orders.POST("/generate", s.generateRandomOrdersHandler)
 	orders.POST("/geolocate", s.geolocateOrdersHandler)
 	orders.POST("/sync", s.pullFromUpstreamHandler)
+	orders.GET("/sorted", s.getDeliveryOrdersSorted)
 }

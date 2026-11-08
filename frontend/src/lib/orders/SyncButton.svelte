@@ -9,6 +9,7 @@
         mutationFn: api.orders.pullUpstreamOrders,
         onSuccess() {
             queryClient.invalidateQueries({ queryKey: ["orders"] });
+            queryClient.invalidateQueries({ queryKey: ["sorted-orders"] });
         },
         onError(error) {
             if (isAxiosError<GetOrdersRes>(error)) {

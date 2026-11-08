@@ -21,3 +21,4 @@ func (s *Server) geolocateOrdersHandler(c *echo.Context) error {
 	return JSON(c, http.StatusOK, &GeolocateResponse{Ok: true})
 }
 
+

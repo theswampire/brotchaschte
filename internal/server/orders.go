@@ -8,6 +8,18 @@ import (
 	"github.com/labstack/echo/v5"
 )
 
+type MaybeFloat64 struct {
+	Ok    bool    `json:"ok"`
+	Value float64 `json:"value"`
+}
+
+func NewMaybeFloat64(v sql.NullFloat64) MaybeFloat64 {
+	return MaybeFloat64{
+		Ok:    v.Valid,
+		Value: v.Float64,
+	}
+}
+
 type GetOrdersResponse struct {
 	Ok                   bool                     `json:"ok"`
 	Error                string                   `json:"error"`
@@ -42,18 +54,6 @@ type GeocodedOrderDTO struct {
 	Label string  `json:"label"`
 }
 
-type MaybeFloat64 struct {
-	Ok    bool    `json:"ok"`
-	Value float64 `json:"value"`
-}
-
-func NewMaybeFloat64(v sql.NullFloat64) MaybeFloat64 {
-	return MaybeFloat64{
-		Ok:    v.Valid,
-		Value: v.Float64,
-	}
-}
-
 type FailedGeocodedOrderDTO struct {
 	OrderDTO
 
@@ -61,6 +61,17 @@ type FailedGeocodedOrderDTO struct {
 	SuggestedNorthing MaybeFloat64 `json:"suggested_northing"`
 	SuggestedEasting  MaybeFloat64 `json:"suggested_easting"`
 	SuggestedLabel    string       `json:"suggested_label"`
+}
+
+type OrderDeliveryDTO struct {
+	OrderDTO
+	X                     float64 `json:"x"`
+	Y                     float64 `json:"y"`
+	Label                 string  `json:"label"`
+	HasAssociatedDelivery bool    `json:"has_associated_delivery"`
+	DeliveryId            int64   `json:"delivery_id"`
+	DeliveryLabel         string  `json:"delivery_label"`
+	DeliveryColor         string  `json:"delivery_color"`
 }
 
 func (s *Server) getOrdersHandler(c *echo.Context) error {
@@ -184,4 +195,47 @@ func (s *Server) pullFromUpstreamHandler(c *echo.Context) error {
 	}
 
 	return JSON(c, http.StatusInternalServerError, &GetOrdersResponse{Ok: true})
+}
+
+type GetDeliveryOrdersRes struct {
+	Ok     bool               `json:"ok"`
+	Error  string             `json:"error"`
+	Orders []OrderDeliveryDTO `json:"orders"`
+}
+
+func (s *Server) getDeliveryOrdersSorted(c *echo.Context) error {
+	orders_row, err := s.delivery.GetOrderCoordinates(c.Request().Context())
+	if err != nil {
+		return JSON(c, http.StatusInternalServerError, &GetOrdersResponse{Ok: false, Error: "Ein Fehler ist aufgetreten. Die sortierten Bestellungen konnten nicht geladen werden."})
+	}
+	orders := make([]OrderDeliveryDTO, len(orders_row))
+	for i, o := range orders_row {
+		orders[i] = OrderDeliveryDTO{
+			OrderDTO: OrderDTO{
+				Id:             o.ID,
+				Lastname:       o.Lastname,
+				Firstname:      o.Firstname,
+				Phonenumber:    o.Phonenumber,
+				Email:          o.Email,
+				AmountsizeS:    uint8(o.Amountsizes),
+				AmountsizeM:    uint8(o.Amountsizem),
+				AmountsizeL:    uint8(o.Amountsizel),
+				Address:        o.Address,
+				City:           o.City,
+				Postalcode:     o.Postalcode,
+				Deliverymethod: o.Deliverymethod,
+				Remarks:        o.Remarks.String,
+				Ordermethod:    o.Ordermethod.String,
+				Vendorgroup:    o.Vendorgroup.String,
+			},
+			X:                     o.X,
+			Y:                     o.Y,
+			Label:                 o.AddressLabel,
+			HasAssociatedDelivery: o.DeliveryID.Valid,
+			DeliveryId:            o.DeliveryID.Int64,
+			DeliveryLabel:         o.DeliveryLabel.String,
+			DeliveryColor:         o.Color.String,
+		}
+	}
+	return JSON(c, http.StatusOK, &GetDeliveryOrdersRes{Ok: true, Orders: orders})
 }

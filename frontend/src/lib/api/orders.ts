@@ -38,13 +38,32 @@ export type GetOrdersRes = {
 	error?: string;
 };
 
+export type OrderDelivery = GeocodedOrder &
+	(
+		| {
+			has_associated_delivery: true;
+			delivery_id: number;
+			delivery_label: string;
+			delivery_color: string;
+		}
+		| { has_associated_delivery: false }
+	);
 export type GeocodeOrdersRes = {
 	ok: boolean;
 	error?: string;
 };
 
+export type GetSortedOrdersRes = {
+	ok: boolean;
+	error?: string;
+	orders: OrderDelivery[];
+};
+
 export function getOrders() {
-	return apiV1client.get<GetOrdersRes>("/api/v1/orders").then(x => {console.log(x); return x});
+	return apiV1client.get<GetOrdersRes>("/api/v1/orders");
+}
+export function getSortedOrders() {
+	return apiV1client.get<GetSortedOrdersRes>("/api/v1/orders/sorted");
 }
 
 export function generateRandomOrders() {

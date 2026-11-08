@@ -1,9 +1,12 @@
 <script lang="ts">
     import "svelte-maplibre-gl/vite";
+    import type { Map as MapMap, StyleSpecification } from "maplibre-gl";
     import { MapLibre, Marker } from "svelte-maplibre-gl";
     import { type Coords, toLngLat } from "@/lib/map/coords";
     import { STANDARD_COLORS } from "@/lib/map/marker";
-    import type { Map as MapMap, StyleSpecification } from "maplibre-gl";
+    import type { Snippet } from "svelte";
+
+    const { children }: { children?: Snippet } = $props();
 
     const MAPLIBRE_URL =
         "https://vectortiles.geo.admin.ch/styles/ch.swisstopo.basemap.vt/style.json";
@@ -39,7 +42,12 @@
     {style}
     zoom={14}
 >
-    <Marker lnglat={toLngLat(MAT_COORDS)} color={STANDARD_COLORS.center}>
+    {@render children?.()}
+    <Marker
+        lnglat={toLngLat(MAT_COORDS)}
+        color={STANDARD_COLORS.center}
+        offset={[0, -24 /* so it doesn't cover the address */]}
+    >
         {#snippet content()}
             <div
                 class="bg-white size-5 rounded-full absolute top-2 left-1/2 -translate-x-1/2"
