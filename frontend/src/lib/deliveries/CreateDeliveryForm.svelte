@@ -1,6 +1,9 @@
 <script lang="ts">
     import ColorPicker from "svelte-awesome-color-picker";
     import { generateRandomNonYellowHue, hslToRgb, rgbToHex } from "./colors";
+    import { createMutation, useQueryClient } from "@tanstack/svelte-query";
+    import { api } from "@/lib/api/api";
+    import { navigate } from "sv-router/generated";
 
     function generateRandomColor() {
         const hue = generateRandomNonYellowHue();
@@ -19,6 +22,20 @@
 
     let hex = $state(generateRandomColor());
     let swatches = $state(generateSwatches(N_SWATCHES));
+
+    const queryClient = useQueryClient();
+    const createDeliveryMutation = createMutation(() => ({
+        mutationFn: api.deliveries.createNewDelivery,
+        onSuccess(data) {
+            queryClient.invalidateQueries({ queryKey: ["deliveries"] });
+            const id = data.data.delivery.id;
+            navigate("/deliveries/:deliveryId", {
+                params: {
+                    deliveryId: id.toString(),
+                },
+            });
+        },
+    }));
 </script>
 
 <form
@@ -27,7 +44,7 @@
         e.preventDefault();
         const data = new FormData(e.currentTarget);
         console.log(data);
-        // TODO: create mutation and on creation navigate to /deliveries/new-id to directly edit it
+        createDeliveryMutation.mutate(data);
     }}
 >
     <div class="flex justify-between gap-5 mb-5">

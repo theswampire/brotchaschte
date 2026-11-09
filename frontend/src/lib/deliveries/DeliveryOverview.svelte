@@ -2,6 +2,7 @@
     import { createQuery } from "@tanstack/svelte-query";
     import { api } from "@/lib/api/api";
     import CreateDeliveryForm from "./CreateDeliveryForm.svelte";
+    import { p } from "sv-router/generated";
 
     const query = createQuery(() => ({
         queryKey: ["deliveries"],
@@ -21,7 +22,13 @@
     {/if}
     {#if query.isSuccess}
         {#each query.data.data.deliveries as delivery}
-            <div class="flex gap-3">
+            <a
+                class="flex gap-3"
+                href={p("/deliveries/:deliveryId", {
+                    params: { deliveryId: delivery.id.toString() },
+                })}
+                data-view-transition
+            >
                 <div
                     class="aspect-square w-10"
                     style:background-color={delivery.color}
@@ -29,7 +36,7 @@
                 {delivery.id}
                 {delivery.label}
                 {delivery.until}
-            </div>
+            </a>
         {/each}
     {/if}
 </section>

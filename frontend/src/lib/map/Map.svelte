@@ -38,7 +38,7 @@
 <MapLibre
     bind:map
     center={toLngLat(MAT_COORDS)}
-    class="h-[calc(100vh-6em)] z-0"
+    class="h-full z-0"
     {style}
     zoom={14}
 >

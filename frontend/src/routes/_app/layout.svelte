@@ -11,9 +11,9 @@
 	setMarkerStoreContext();
 </script>
 
-<nav class="w-full">
+<nav class="w-full h-14">
 	<div
-		class="flex mx-auto max-w-2xl w-full gap-10 p-3 items-center justify-between"
+		class="flex mx-auto max-w-2xl h-full w-full gap-10 items-center justify-between"
 	>
 		<a href={p("/")} data-view-transition>Karte</a>
 		<a href={p("/orders")} data-view-transition>Bestellungen</a>
@@ -21,7 +21,8 @@
 		<LogoutButton />
 	</div>
 </nav>
-<div class="relative">
+<!-- h-[calc(100%-56px)] is the exact height left after the nav element with h-14 -->
+<div class="relative h-[calc(100%-56px)]">
 	<MapComp>
 		<Markers />
 	</MapComp>

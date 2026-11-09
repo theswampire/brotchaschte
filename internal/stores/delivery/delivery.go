@@ -31,8 +31,8 @@ func (d *DeliveryStore) GetOrderCoordinates(ctx context.Context) ([]query.GetOrd
 func randomColorExceptYellow() string {
 	return fmt.Sprintf("hsl(%d, 70%%, %d%%)", (rand.Intn(300)+60+30)%360, rand.Intn(21)+50)
 }
-func (d *DeliveryStore) CreateNewDelivery(ctx context.Context, label, until string) (query.Delivery, error) {
-	return d.queries.CreateDelivery(ctx, query.CreateDeliveryParams{Label: label, Until: until, Color: randomColorExceptYellow()})
+func (d *DeliveryStore) CreateNewDelivery(ctx context.Context, label, until, color string) (query.Delivery, error) {
+	return d.queries.CreateDelivery(ctx, query.CreateDeliveryParams{Label: label, Until: until, Color: color})
 }
 
 func (d *DeliveryStore) NewDeliveryColor(ctx context.Context, delivery_id int64) (query.Delivery, error) {
