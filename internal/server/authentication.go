@@ -23,10 +23,10 @@ func (s *Server) loginHandler(c *echo.Context) error {
 	password := c.FormValue("password")
 	ok, err := s.auth.AuthenticateUser(c.Request().Context(), email, password)
 	if err != nil {
-		return JSON(c, http.StatusInternalServerError, &LoginResponse{Ok: false, Error: "ein Fehler ist aufgetreten", Email: ""})
+		return c.JSON(http.StatusInternalServerError, &LoginResponse{Ok: false, Error: "ein Fehler ist aufgetreten", Email: ""})
 	}
 	if !ok {
-		return JSON(c, http.StatusUnauthorized, &LoginResponse{Ok: false, Error: "ungültige Anmeldedaten"})
+		return c.JSON(http.StatusUnauthorized, &LoginResponse{Ok: false, Error: "ungültige Anmeldedaten"})
 	}
 
 	sessionManager := s.auth.SessionManager()
@@ -34,11 +34,11 @@ func (s *Server) loginHandler(c *echo.Context) error {
 	// Regenerate the session token to prevent session fixation
 	if err := sessionManager.RenewToken(c.Request().Context()); err != nil {
 		log.Printf("failed to renew session in login: %s\n", err.Error())
-		return JSON(c, http.StatusInternalServerError, &LoginResponse{Ok: false, Error: "ein Fehler ist aufgetreten: Session konnte nicht erneuert werden."})
+		return c.JSON(http.StatusInternalServerError, &LoginResponse{Ok: false, Error: "ein Fehler ist aufgetreten: Session konnte nicht erneuert werden."})
 	}
 
 	sessionManager.Put(c.Request().Context(), "email", email)
-	return JSON(c, http.StatusOK, &LoginResponse{Ok: true, Email: email})
+	return c.JSON(http.StatusOK, &LoginResponse{Ok: true, Email: email})
 }
 
 // logoutHandler is the api handler for the logout flow
@@ -153,14 +153,30 @@ func (s *Server) loadAndSaveHttpSession(next echo.HandlerFunc) echo.HandlerFunc 
 			return nil
 		}
 
-		sr := c.Request().WithContext(ctx)
+		// Preserve original echo context
+		originalRequest := c.Request()
+		originalResponse := c.Response()
+
+		sr := originalRequest.WithContext(ctx)
 		sw := &sessionResponseWriter{
-			ResponseWriter: c.Response(),
+			ResponseWriter: originalResponse,
 			request:        sr,
 			sessionManager: sm,
 		}
-		new_c := echo.NewContext(sr, sw)
-		err = next(new_c)
+
+		// Update instead of creating a new one
+		//new_c := echo.NewContext(sr, sw)
+		// err = next(new_c)
+		c.SetRequest(sr)
+		c.SetResponse(sw)
+
+		defer func() {
+			c.SetRequest(originalRequest)
+			c.SetResponse(originalResponse)
+		}()
+
+		err = next(c)
+
 		if !sw.written {
 			commitAndWriteSessionCookie(sm, c.Response(), sr)
 		}

@@ -46,7 +46,9 @@ func (s *Server) registerApiV1Routes(e *echo.Echo) {
 
 	deliveries := router.Group("/deliveries")
 	deliveries.Use(s.requireSession)
-	deliveries.GET("", s.getDelivery)
-	deliveries.POST("", s.createDelivery)
-	deliveries.GET("/all", s.getDeliveries)
+	deliveries.GET("", s.getDeliveryHandler)
+	deliveries.POST("", s.createDeliveryHandler)
+	deliveries.PATCH("", s.editDeliveryHandler)
+	deliveries.GET("/all", s.getDeliveriesHandler)
+	deliveries.POST("/assign", s.assignOrdersHandler)
 }

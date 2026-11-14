@@ -77,15 +77,15 @@ type OrderDeliveryDTO struct {
 func (s *Server) getOrdersHandler(c *echo.Context) error {
 	not_geocoded_rows, err := s.geocode.GetNotGeocodedExcludeFailed(c.Request().Context())
 	if err != nil {
-		return JSON(c, http.StatusInternalServerError, &GetOrdersResponse{Ok: false, Error: "Ein Fehler ist aufgetreten. Die Bestellungen konnten nicht geladen werden."})
+		return c.JSON(http.StatusInternalServerError, &GetOrdersResponse{Ok: false, Error: "Ein Fehler ist aufgetreten. Die Bestellungen konnten nicht geladen werden."})
 	}
 	failed_geocoded_rows, err := s.geocode.GetFailedGeocodeOrders(c.Request().Context())
 	if err != nil {
-		return JSON(c, http.StatusInternalServerError, &GetOrdersResponse{Ok: false, Error: "Ein Fehler ist aufgetreten. Die Bestellungen mit fehlgeschlagener Geolokalisierung konnten nicht geladen werden."})
+		return c.JSON(http.StatusInternalServerError, &GetOrdersResponse{Ok: false, Error: "Ein Fehler ist aufgetreten. Die Bestellungen mit fehlgeschlagener Geolokalisierung konnten nicht geladen werden."})
 	}
 	geocoded_rows, err := s.geocode.GetGeocodedOrders(c.Request().Context())
 	if err != nil {
-		return JSON(c, http.StatusInternalServerError, &GetOrdersResponse{Ok: false, Error: "Ein Fehler ist aufgetreten. Die Bestellungen mit Geolokalisierung konnten nicht geladen werden."})
+		return c.JSON(http.StatusInternalServerError, &GetOrdersResponse{Ok: false, Error: "Ein Fehler ist aufgetreten. Die Bestellungen mit Geolokalisierung konnten nicht geladen werden."})
 	}
 
 	not_geocoded := make([]OrderDTO, len(not_geocoded_rows))
@@ -156,14 +156,14 @@ func (s *Server) getOrdersHandler(c *echo.Context) error {
 			Label: o.Label,
 		}
 	}
-	return JSON(c, http.StatusOK, &GetOrdersResponse{Ok: true, NotGeocodedOrders: not_geocoded, FailedGeocodedOrders: failed_geocodes, GeocodedOrders: geocoded_orders})
+	return c.JSON(http.StatusOK, &GetOrdersResponse{Ok: true, NotGeocodedOrders: not_geocoded, FailedGeocodedOrders: failed_geocodes, GeocodedOrders: geocoded_orders})
 }
 
 func (s *Server) generateRandomOrdersHandler(c *echo.Context) error {
 	raw_orders := s.orders.GenerateRandomOrders(c.Request().Context(), 50)
 	err := s.orders.CreateBulk(c.Request().Context(), raw_orders)
 	if err != nil {
-		return JSON(c, http.StatusInternalServerError, &GetOrdersResponse{Ok: false, Error: "Ein Fehler ist aufgetreten. Es konnten keine zufälligen Bestellungen generiert werden."})
+		return c.JSON(http.StatusInternalServerError, &GetOrdersResponse{Ok: false, Error: "Ein Fehler ist aufgetreten. Es konnten keine zufälligen Bestellungen generiert werden."})
 	}
 	orders := make([]OrderDTO, len(raw_orders))
 	for i, o := range raw_orders {
@@ -184,29 +184,34 @@ func (s *Server) generateRandomOrdersHandler(c *echo.Context) error {
 			Vendorgroup:    o.Vendorgroup.String,
 		}
 	}
-	return JSON(c, http.StatusOK, &GetOrdersResponse{Ok: true, NotGeocodedOrders: orders})
+	return c.JSON(http.StatusOK, &GetOrdersResponse{Ok: true, NotGeocodedOrders: orders})
 }
 
 func (s *Server) pullFromUpstreamHandler(c *echo.Context) error {
 	err := s.orders.SyncWithUpstream(c.Request().Context())
 	if err != nil {
 		log.Printf("error: failed to sync with upstream: %s\n", err.Error())
-		return JSON(c, http.StatusInternalServerError, &GetOrdersResponse{Ok: false, Error: "Ein Fehler ist aufgetreten. Bestellungen konnten nicht importiert werden."})
+		return c.JSON(http.StatusInternalServerError, &GetOrdersResponse{Ok: false, Error: "Ein Fehler ist aufgetreten. Bestellungen konnten nicht importiert werden."})
 	}
 
-	return JSON(c, http.StatusInternalServerError, &GetOrdersResponse{Ok: true})
+	return c.JSON(http.StatusInternalServerError, &GetOrdersResponse{Ok: true})
 }
 
 type GetDeliveryOrdersRes struct {
-	Ok     bool               `json:"ok"`
-	Error  string             `json:"error"`
-	Orders []OrderDeliveryDTO `json:"orders"`
+	Ok         bool               `json:"ok"`
+	Error      string             `json:"error"`
+	Orders     []OrderDeliveryDTO `json:"orders"`
+	Deliveries []DeliveryDTO      `json:"deliveries"`
 }
 
 func (s *Server) getDeliveryOrdersSorted(c *echo.Context) error {
 	orders_row, err := s.delivery.GetOrderCoordinates(c.Request().Context())
 	if err != nil {
-		return JSON(c, http.StatusInternalServerError, &GetOrdersResponse{Ok: false, Error: "Ein Fehler ist aufgetreten. Die sortierten Bestellungen konnten nicht geladen werden."})
+		return c.JSON(http.StatusInternalServerError, &GetDeliveryOrdersRes{Ok: false, Error: "Ein Fehler ist aufgetreten. Die sortierten Bestellungen konnten nicht geladen werden."})
+	}
+	delivery_row, err := s.delivery.GetDeliveries(c.Request().Context())
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, &GetDeliveryOrdersRes{Ok: false, Error: "Ein Fehler ist aufgetreten. Die Lieferungen zu den sortierten Bestellungen konnten nicht geladen werden."})
 	}
 	orders := make([]OrderDeliveryDTO, len(orders_row))
 	for i, o := range orders_row {
@@ -237,5 +242,9 @@ func (s *Server) getDeliveryOrdersSorted(c *echo.Context) error {
 			DeliveryColor:         o.Color.String,
 		}
 	}
-	return JSON(c, http.StatusOK, &GetDeliveryOrdersRes{Ok: true, Orders: orders})
+	deliveries := make([]DeliveryDTO, len(delivery_row))
+	for i, d := range delivery_row {
+		deliveries[i] = DeliveryDTO{ID: d.ID, Label: d.Label, Until: d.Until, Color: d.Color}
+	}
+	return c.JSON(http.StatusOK, &GetDeliveryOrdersRes{Ok: true, Orders: orders, Deliveries: deliveries})
 }

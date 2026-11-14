@@ -86,3 +86,51 @@ func (q *Queries) GetOrderedDeliveries(ctx context.Context) ([]GetOrderedDeliver
 	}
 	return items, nil
 }
+
+const getOrdersOfDelivery = `-- name: GetOrdersOfDelivery :many
+SELECT orders.id, orders.lastname, orders.firstname, orders.phonenumber, orders.email, orders.amountsizes, orders.amountsizem, orders.amountsizel, orders.address, orders.city, orders.postalcode, orders.deliverymethod, orders.remarks, orders.ordermethod, orders.vendorgroup 
+FROM raw_orders AS orders 
+JOIN delivery_orders
+    ON orders.id = delivery_orders.order_id
+WHERE delivery_orders.delivery_id = ?
+ORDER BY orders.id ASC
+`
+
+func (q *Queries) GetOrdersOfDelivery(ctx context.Context, deliveryID int64) ([]RawOrder, error) {
+	rows, err := q.db.QueryContext(ctx, getOrdersOfDelivery, deliveryID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []RawOrder
+	for rows.Next() {
+		var i RawOrder
+		if err := rows.Scan(
+			&i.ID,
+			&i.Lastname,
+			&i.Firstname,
+			&i.Phonenumber,
+			&i.Email,
+			&i.Amountsizes,
+			&i.Amountsizem,
+			&i.Amountsizel,
+			&i.Address,
+			&i.City,
+			&i.Postalcode,
+			&i.Deliverymethod,
+			&i.Remarks,
+			&i.Ordermethod,
+			&i.Vendorgroup,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

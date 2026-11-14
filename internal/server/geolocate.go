@@ -11,14 +11,11 @@ type GeolocateResponse struct {
 	Error string `json:"error"`
 }
 
-
 func (s *Server) geolocateOrdersHandler(c *echo.Context) error {
 	err := s.geocode.GeocodeOrders(c.Request().Context())
 	if err != nil {
-		return JSON(c, http.StatusOK, &GeolocateResponse{Ok: false, Error: "Ein Fehler ist aufgetreten. Die Bestellungen konnten nicht geokodiert werden."})
+		return c.JSON(http.StatusOK, &GeolocateResponse{Ok: false, Error: "Ein Fehler ist aufgetreten. Die Bestellungen konnten nicht geokodiert werden."})
 	}
 
-	return JSON(c, http.StatusOK, &GeolocateResponse{Ok: true})
+	return c.JSON(http.StatusOK, &GeolocateResponse{Ok: true})
 }
-
-

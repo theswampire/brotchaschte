@@ -7,21 +7,20 @@
 
     const markerstore = getMarkerStoreContext();
 
-    const sortedOrdersQuery = createQuery(() => ({
+    const query = createQuery(() => ({
         queryKey: ["sorted-orders"],
         queryFn: api.orders.getSortedOrders,
     }));
     let lastsuccess = $state(0);
 
     $effect(() => {
-        if (sortedOrdersQuery.isPending) return;
-        if (
-            !sortedOrdersQuery.isSuccess ||
-            lastsuccess >= sortedOrdersQuery.dataUpdatedAt
-        )
-            return;
-        lastsuccess = sortedOrdersQuery.dataUpdatedAt;
-        markerstore.setOrders(sortedOrdersQuery.data.data.orders);
+        if (query.isPending) return;
+        if (!query.isSuccess || lastsuccess >= query.dataUpdatedAt) return;
+        lastsuccess = query.dataUpdatedAt;
+        markerstore.setOrders(
+            query.data.data.orders,
+            query.data.data.deliveries,
+        );
     });
 </script>
 
@@ -29,6 +28,9 @@
     <Marker
         offset={[0, -24 /* so it doesn't cover the address */]}
         lnglat={toLngLat([m.order.y, m.order.x])}
+        onclick={() => {
+            markerstore._markerOnClick(m.order.id);
+        }}
     >
         {#snippet content()}
             <svg display="block" height="41px" width="27px" viewBox="0 0 27 41"

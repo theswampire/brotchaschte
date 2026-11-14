@@ -8,3 +8,11 @@ LEFT JOIN delivery
 LEFT JOIN order_coordinates AS coords
     ON coords.order_id = orders.id
 ORDER BY delivery.id, orders.address ASC;
+
+-- name: GetOrdersOfDelivery :many
+SELECT orders.* 
+FROM raw_orders AS orders 
+JOIN delivery_orders
+    ON orders.id = delivery_orders.order_id
+WHERE delivery_orders.delivery_id = ?
+ORDER BY orders.id ASC;

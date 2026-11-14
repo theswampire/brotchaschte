@@ -47,11 +47,15 @@ func (d *DeliveryStore) GetDeliveries(ctx context.Context) ([]query.Delivery, er
 	return d.queries.GetDeliveries(ctx)
 }
 
-func (d *DeliveryStore) UpdateDelivery(ctx context.Context, id int64, until, label string) (query.Delivery, error) {
-	return d.queries.UpdateDelivery(ctx, query.UpdateDeliveryParams{ID: id, Until: until, Label: label})
+func (d *DeliveryStore) UpdateDelivery(ctx context.Context, id int64, until, label, color string) (query.Delivery, error) {
+	return d.queries.UpdateDelivery(ctx, query.UpdateDeliveryParams{ID: id, Until: until, Label: label, Color: color})
 }
 
-func (d *DeliveryStore) AssignOrders(ctx context.Context, id int64, selected_orders, notselected_orders []string) error {
+func (d *DeliveryStore) GetOrdersOfDelivery(ctx context.Context, delivery_id int64) ([]query.RawOrder, error) {
+	return d.queries.GetOrdersOfDelivery(ctx, delivery_id)
+}
+
+func (d *DeliveryStore) AssignOrders(ctx context.Context, delivery_id int64, selected_orders, notselected_orders []string) error {
 	tx, err := d.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -60,7 +64,7 @@ func (d *DeliveryStore) AssignOrders(ctx context.Context, id int64, selected_ord
 	defer tx.Rollback()
 
 	for _, orderid := range notselected_orders {
-		err := queries.DeleteDeliveryOrderDeselected(ctx, query.DeleteDeliveryOrderDeselectedParams{OrderID: orderid, DeliveryID: id})
+		err := queries.DeleteDeliveryOrderDeselected(ctx, query.DeleteDeliveryOrderDeselectedParams{OrderID: orderid, DeliveryID: delivery_id})
 		if err != nil {
 			log.Printf("error while deleting deselected: %s\n", err.Error())
 			continue
@@ -68,7 +72,7 @@ func (d *DeliveryStore) AssignOrders(ctx context.Context, id int64, selected_ord
 	}
 
 	for _, orderid := range selected_orders {
-		err := queries.CreateDeliveryOrderSelected(ctx, query.CreateDeliveryOrderSelectedParams{OrderID: orderid, DeliveryID: id})
+		err := queries.CreateDeliveryOrderSelected(ctx, query.CreateDeliveryOrderSelectedParams{OrderID: orderid, DeliveryID: delivery_id})
 		if err != nil {
 			log.Printf("error while updating selected: %s\n", err.Error())
 			continue

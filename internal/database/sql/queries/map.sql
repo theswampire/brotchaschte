@@ -22,7 +22,7 @@ RETURNING *;
 
 -- name: UpdateDelivery :one
 UPDATE delivery
-SET until = ?, label = ?
+SET until = ?, label = ?, color = ?
 WHERE id = ?
 RETURNING *;
 

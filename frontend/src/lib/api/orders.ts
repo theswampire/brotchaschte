@@ -1,4 +1,5 @@
 import { apiV1client } from "./axios";
+import type { Delivery } from "./deliveries";
 
 export type Order = {
 	id: string;
@@ -57,6 +58,7 @@ export type GetSortedOrdersRes = {
 	ok: boolean;
 	error?: string;
 	orders: OrderDelivery[];
+	deliveries: Delivery[];
 };
 
 export function getOrders() {

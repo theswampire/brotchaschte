@@ -199,7 +199,7 @@ func (q *Queries) GetOrderCoordinates(ctx context.Context) ([]GetOrderCoordinate
 
 const updateDelivery = `-- name: UpdateDelivery :one
 UPDATE delivery
-SET until = ?, label = ?
+SET until = ?, label = ?, color = ?
 WHERE id = ?
 RETURNING id, label, until, color
 `
@@ -207,11 +207,17 @@ RETURNING id, label, until, color
 type UpdateDeliveryParams struct {
 	Until string
 	Label string
+	Color string
 	ID    int64
 }
 
 func (q *Queries) UpdateDelivery(ctx context.Context, arg UpdateDeliveryParams) (Delivery, error) {
-	row := q.db.QueryRowContext(ctx, updateDelivery, arg.Until, arg.Label, arg.ID)
+	row := q.db.QueryRowContext(ctx, updateDelivery,
+		arg.Until,
+		arg.Label,
+		arg.Color,
+		arg.ID,
+	)
 	var i Delivery
 	err := row.Scan(
 		&i.ID,
