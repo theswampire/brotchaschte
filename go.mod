@@ -1,16 +1,17 @@
 module brotchaschte2
 
-go 1.25.10
-
-require github.com/joho/godotenv v1.5.1
+go 1.27.3
 
 require (
+	codeberg.org/go-pdf/fpdf v0.12.0
 	github.com/alexedwards/scs/sqlite3store v0.0.0-20251002162104-209de6e426de
 	github.com/alexedwards/scs/v2 v2.9.0
 	github.com/hbollon/go-edlib v1.7.0
 	github.com/jackc/pgx/v5 v5.9.2
+	github.com/joho/godotenv v1.5.1
 	github.com/labstack/echo/v5 v5.1.1
 	github.com/mattn/go-sqlite3 v1.14.45
+	github.com/pressly/goose/v3 v3.27.1
 	golang.org/x/crypto v0.53.0
 )
 
@@ -23,10 +24,5 @@ require (
 	golang.org/x/sync v0.21.0 // indirect
 	golang.org/x/sys v0.46.0 // indirect
 	golang.org/x/text v0.38.0 // indirect
-)
-
-require (
-	codeberg.org/go-pdf/fpdf v0.12.0
-	github.com/pressly/goose/v3 v3.27.1
 	golang.org/x/time v0.14.0 // indirect
 )

@@ -62,6 +62,12 @@ type FailedGeocodedOrderDTO struct {
 	SuggestedEasting  MaybeFloat64 `json:"suggested_easting"`
 	SuggestedLabel    string       `json:"suggested_label"`
 }
+type GeocodedWithSuggestioOrderDTO struct {
+	FailedGeocodedOrderDTO
+	X     MaybeFloat64 `json:"x"`
+	Y     MaybeFloat64 `json:"y"`
+	Label string       `json:"label"`
+}
 
 type OrderDeliveryDTO struct {
 	OrderDTO
@@ -110,22 +116,21 @@ func (s *Server) getOrdersHandler(c *echo.Context) error {
 	failed_geocodes := make([]FailedGeocodedOrderDTO, len(failed_geocoded_rows))
 	for i, o := range failed_geocoded_rows {
 		failed_geocodes[i] = FailedGeocodedOrderDTO{
-			OrderDTO: OrderDTO{Id: o.ID,
-				Lastname:       o.Lastname,
-				Firstname:      o.Firstname,
-				Phonenumber:    o.Phonenumber,
-				Email:          o.Email,
-				AmountsizeS:    uint8(o.Amountsizes),
-				AmountsizeM:    uint8(o.Amountsizem),
-				AmountsizeL:    uint8(o.Amountsizel),
-				Address:        o.Address,
-				City:           o.City,
-				Postalcode:     o.Postalcode,
-				Deliverymethod: o.Deliverymethod,
-				Remarks:        o.Remarks.String,
-				Ordermethod:    o.Ordermethod.String,
-				Vendorgroup:    o.Vendorgroup.String,
-			},
+			Id:                o.ID,
+			Lastname:          o.Lastname,
+			Firstname:         o.Firstname,
+			Phonenumber:       o.Phonenumber,
+			Email:             o.Email,
+			AmountsizeS:       uint8(o.Amountsizes),
+			AmountsizeM:       uint8(o.Amountsizem),
+			AmountsizeL:       uint8(o.Amountsizel),
+			Address:           o.Address,
+			City:              o.City,
+			Postalcode:        o.Postalcode,
+			Deliverymethod:    o.Deliverymethod,
+			Remarks:           o.Remarks.String,
+			Ordermethod:       o.Ordermethod.String,
+			Vendorgroup:       o.Vendorgroup.String,
 			Message:           o.Message,
 			SuggestedNorthing: NewMaybeFloat64(o.SuggestedNorthing),
 			SuggestedEasting:  NewMaybeFloat64(o.SuggestedEasting),
@@ -135,28 +140,66 @@ func (s *Server) getOrdersHandler(c *echo.Context) error {
 	geocoded_orders := make([]GeocodedOrderDTO, len(geocoded_rows))
 	for i, o := range geocoded_rows {
 		geocoded_orders[i] = GeocodedOrderDTO{
-			OrderDTO: OrderDTO{Id: o.ID,
-				Lastname:       o.Lastname,
-				Firstname:      o.Firstname,
-				Phonenumber:    o.Phonenumber,
-				Email:          o.Email,
-				AmountsizeS:    uint8(o.Amountsizes),
-				AmountsizeM:    uint8(o.Amountsizem),
-				AmountsizeL:    uint8(o.Amountsizel),
-				Address:        o.Address,
-				City:           o.City,
-				Postalcode:     o.Postalcode,
-				Deliverymethod: o.Deliverymethod,
-				Remarks:        o.Remarks.String,
-				Ordermethod:    o.Ordermethod.String,
-				Vendorgroup:    o.Vendorgroup.String,
-			},
-			X:     o.X,
-			Y:     o.Y,
-			Label: o.Label,
+			Id:             o.ID,
+			Lastname:       o.Lastname,
+			Firstname:      o.Firstname,
+			Phonenumber:    o.Phonenumber,
+			Email:          o.Email,
+			AmountsizeS:    uint8(o.Amountsizes),
+			AmountsizeM:    uint8(o.Amountsizem),
+			AmountsizeL:    uint8(o.Amountsizel),
+			Address:        o.Address,
+			City:           o.City,
+			Postalcode:     o.Postalcode,
+			Deliverymethod: o.Deliverymethod,
+			Remarks:        o.Remarks.String,
+			Ordermethod:    o.Ordermethod.String,
+			Vendorgroup:    o.Vendorgroup.String,
+			X:              o.X,
+			Y:              o.Y,
+			Label:          o.Label,
 		}
 	}
 	return c.JSON(http.StatusOK, &GetOrdersResponse{Ok: true, NotGeocodedOrders: not_geocoded, FailedGeocodedOrders: failed_geocodes, GeocodedOrders: geocoded_orders})
+}
+
+type GetGeocodeWithSuggestionOrderRes struct {
+	Ok    bool                          `json:"ok"`
+	Error string                        `json:"error"`
+	Order GeocodedWithSuggestioOrderDTO `json:"order"`
+}
+
+func (s *Server) getOrderHandler(c *echo.Context) error {
+	id := c.QueryParam("order_id")
+	raw_order, err := s.geocode.GetOrder(c.Request().Context(), id)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, &GetGeocodeWithSuggestionOrderRes{Ok: false, Error: "Ein Fehler ist aufgetreten. Die Bestellung konnte nicht geladen werden."})
+	}
+	return c.JSON(http.StatusOK, &GetGeocodeWithSuggestionOrderRes{Ok: true, Order: GeocodedWithSuggestioOrderDTO{
+		Id:                raw_order.ID,
+		Firstname:         raw_order.Firstname,
+		Lastname:          raw_order.Lastname,
+		Phonenumber:       raw_order.Phonenumber,
+		Email:             raw_order.Email,
+		AmountsizeS:       uint8(raw_order.Amountsizes),
+		AmountsizeM:       uint8(raw_order.Amountsizem),
+		AmountsizeL:       uint8(raw_order.Amountsizel),
+		Address:           raw_order.Address,
+		City:              raw_order.City,
+		Postalcode:        raw_order.Postalcode,
+		Deliverymethod:    raw_order.Deliverymethod,
+		Remarks:           raw_order.Remarks.String,
+		Ordermethod:       raw_order.Ordermethod.String,
+		Vendorgroup:       raw_order.Vendorgroup.String,
+		Message:           raw_order.Message.String,
+		SuggestedNorthing: NewMaybeFloat64(raw_order.SuggestedNorthing),
+		SuggestedEasting:  NewMaybeFloat64(raw_order.SuggestedEasting),
+		SuggestedLabel:    raw_order.SuggestedLabel.String,
+		Label:             raw_order.Label.String,
+		X:                 NewMaybeFloat64(raw_order.X),
+		Y:                 NewMaybeFloat64(raw_order.Y),
+	}})
+
 }
 
 func (s *Server) generateRandomOrdersHandler(c *echo.Context) error {
@@ -167,7 +210,8 @@ func (s *Server) generateRandomOrdersHandler(c *echo.Context) error {
 	}
 	orders := make([]OrderDTO, len(raw_orders))
 	for i, o := range raw_orders {
-		orders[i] = OrderDTO{Id: o.ID,
+		orders[i] = OrderDTO{
+			Id:             o.ID,
 			Lastname:       o.Lastname,
 			Firstname:      o.Firstname,
 			Phonenumber:    o.Phonenumber,
@@ -216,23 +260,21 @@ func (s *Server) getDeliveryOrdersSorted(c *echo.Context) error {
 	orders := make([]OrderDeliveryDTO, len(orders_row))
 	for i, o := range orders_row {
 		orders[i] = OrderDeliveryDTO{
-			OrderDTO: OrderDTO{
-				Id:             o.ID,
-				Lastname:       o.Lastname,
-				Firstname:      o.Firstname,
-				Phonenumber:    o.Phonenumber,
-				Email:          o.Email,
-				AmountsizeS:    uint8(o.Amountsizes),
-				AmountsizeM:    uint8(o.Amountsizem),
-				AmountsizeL:    uint8(o.Amountsizel),
-				Address:        o.Address,
-				City:           o.City,
-				Postalcode:     o.Postalcode,
-				Deliverymethod: o.Deliverymethod,
-				Remarks:        o.Remarks.String,
-				Ordermethod:    o.Ordermethod.String,
-				Vendorgroup:    o.Vendorgroup.String,
-			},
+			Id:                    o.ID,
+			Lastname:              o.Lastname,
+			Firstname:             o.Firstname,
+			Phonenumber:           o.Phonenumber,
+			Email:                 o.Email,
+			AmountsizeS:           uint8(o.Amountsizes),
+			AmountsizeM:           uint8(o.Amountsizem),
+			AmountsizeL:           uint8(o.Amountsizel),
+			Address:               o.Address,
+			City:                  o.City,
+			Postalcode:            o.Postalcode,
+			Deliverymethod:        o.Deliverymethod,
+			Remarks:               o.Remarks.String,
+			Ordermethod:           o.Ordermethod.String,
+			Vendorgroup:           o.Vendorgroup.String,
 			X:                     o.X,
 			Y:                     o.Y,
 			Label:                 o.AddressLabel,

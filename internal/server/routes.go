@@ -14,9 +14,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 	e.Use(s.loadAndSaveHttpSession)
 	e.Use(s.addAuthCookie)
-	e.GET("/api", s.requireSession(func(c *echo.Context) error {
-		return c.String(http.StatusOK, "Hello, World!")
-	}))
+
 	s.registerApiV1Routes(e)
 
 	frontend.RegisterFrontend(e)
@@ -26,6 +24,9 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 func (s *Server) registerApiV1Routes(e *echo.Echo) {
 	router := e.Group("/api/v1")
+	router.RouteNotFound("*", func(c *echo.Context) error {
+		return c.String(http.StatusNotFound, "Not Found")
+	})
 
 	auth := router.Group("/auth")
 	auth.POST("/login", s.loginHandler)
@@ -41,8 +42,11 @@ func (s *Server) registerApiV1Routes(e *echo.Echo) {
 	orders.GET("", s.getOrdersHandler)
 	orders.POST("/generate", s.generateRandomOrdersHandler)
 	orders.POST("/geolocate", s.geolocateOrdersHandler)
+	orders.PATCH("/geolocate", s.manualLocateHandler)
+	orders.PATCH("/geolocate/update_address", s.manualLocateWithAddressUpdateHandler)
 	orders.POST("/sync", s.pullFromUpstreamHandler)
 	orders.GET("/sorted", s.getDeliveryOrdersSorted)
+	orders.GET("/single", s.getOrderHandler)
 
 	deliveries := router.Group("/deliveries")
 	deliveries.Use(s.requireSession)

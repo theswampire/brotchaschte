@@ -201,6 +201,72 @@ func (q *Queries) GetFailedGeocodes(ctx context.Context) ([]GeocodeError, error)
 	return items, nil
 }
 
+const getGeocodeWithSuggestionOrder = `-- name: GetGeocodeWithSuggestionOrder :one
+SELECT id, lastname, firstname, phonenumber, email, amountsizes, amountsizem, amountsizel, address, city, postalcode, deliverymethod, remarks, ordermethod, vendorgroup, geocode_errors.order_id, message, suggested_northing, suggested_easting, suggested_label, order_coordinates.order_id, x, y, label FROM raw_orders
+LEFT JOIN geocode_errors ON raw_orders.id = geocode_errors.order_id
+LEFT JOIN order_coordinates ON raw_orders.id = order_coordinates.order_id
+WHERE raw_orders.id = ?
+`
+
+type GetGeocodeWithSuggestionOrderRow struct {
+	ID                string
+	Lastname          string
+	Firstname         string
+	Phonenumber       string
+	Email             string
+	Amountsizes       int64
+	Amountsizem       int64
+	Amountsizel       int64
+	Address           string
+	City              string
+	Postalcode        string
+	Deliverymethod    string
+	Remarks           sql.NullString
+	Ordermethod       sql.NullString
+	Vendorgroup       sql.NullString
+	OrderID           sql.NullString
+	Message           sql.NullString
+	SuggestedNorthing sql.NullFloat64
+	SuggestedEasting  sql.NullFloat64
+	SuggestedLabel    sql.NullString
+	OrderID_2         sql.NullString
+	X                 sql.NullFloat64
+	Y                 sql.NullFloat64
+	Label             sql.NullString
+}
+
+func (q *Queries) GetGeocodeWithSuggestionOrder(ctx context.Context, id string) (GetGeocodeWithSuggestionOrderRow, error) {
+	row := q.db.QueryRowContext(ctx, getGeocodeWithSuggestionOrder, id)
+	var i GetGeocodeWithSuggestionOrderRow
+	err := row.Scan(
+		&i.ID,
+		&i.Lastname,
+		&i.Firstname,
+		&i.Phonenumber,
+		&i.Email,
+		&i.Amountsizes,
+		&i.Amountsizem,
+		&i.Amountsizel,
+		&i.Address,
+		&i.City,
+		&i.Postalcode,
+		&i.Deliverymethod,
+		&i.Remarks,
+		&i.Ordermethod,
+		&i.Vendorgroup,
+		&i.OrderID,
+		&i.Message,
+		&i.SuggestedNorthing,
+		&i.SuggestedEasting,
+		&i.SuggestedLabel,
+		&i.OrderID_2,
+		&i.X,
+		&i.Y,
+		&i.Label,
+	)
+	return i, err
+}
+
 const getGeocodedOrders = `-- name: GetGeocodedOrders :many
 SELECT id, lastname, firstname, phonenumber, email, amountsizes, amountsizem, amountsizel, address, city, postalcode, deliverymethod, remarks, ordermethod, vendorgroup, order_id, x, y, label FROM raw_orders
 JOIN order_coordinates ON raw_orders.id = order_coordinates.order_id
@@ -397,6 +463,10 @@ INSERT INTO order_coordinates(order_id, x, y, label)
 SELECT ?1, ?2, ?3, address || ' ' || postalCode || ' ' || city
 FROM raw_orders
 WHERE id = ?1
+ON CONFLICT(order_id)
+DO 
+    UPDATE SET x = excluded.x, y = excluded.y, label = excluded.label
+    WHERE order_id = ?1
 RETURNING order_id, x, y, label
 `
 

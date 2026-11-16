@@ -151,6 +151,32 @@ func (g *GeocodeStore) ManuallyLocateOrder(ctx context.Context, order_id string,
 	return ordercoord, tx.Commit()
 }
 
-func (g *GeocodeStore) GetOrder(ctx context.Context, order_id string) (query.RawOrder, error) {
-	return g.queries.GetOrder(ctx, order_id)
+func (g *GeocodeStore) ManuallyLocateAndUpdateAddressOrder(ctx context.Context, order_id, address, postalcode, city string, northing, easting float64) (query.OrderCoordinate, error) {
+	tx, err := g.db.BeginTx(ctx, nil)
+	if err != nil {
+		log.Println("failed to obtain db transaction for geocoding")
+		return query.OrderCoordinate{}, err
+	}
+	defer tx.Rollback()
+	q := g.queries.WithTx(tx)
+
+	_, err = q.UpdateAddress(ctx, query.UpdateAddressParams{ID: order_id, Address: address, Postalcode: postalcode, City: city})
+	if err != nil {
+		return query.OrderCoordinate{}, err
+	}
+
+	ordercoord, err := q.ManualGeocode(ctx, query.ManualGeocodeParams{OrderID: order_id, X: northing, Y: easting})
+	if err != nil {
+		return query.OrderCoordinate{}, err
+	}
+	err = q.CleanUpErrors(ctx)
+	if err != nil {
+		return query.OrderCoordinate{}, err
+	}
+
+	return ordercoord, tx.Commit()
+}
+
+func (g *GeocodeStore) GetOrder(ctx context.Context, order_id string) (query.GetGeocodeWithSuggestionOrderRow, error) {
+	return g.queries.GetGeocodeWithSuggestionOrder(ctx, order_id)
 }
