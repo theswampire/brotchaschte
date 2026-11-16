@@ -118,3 +118,11 @@ export function manuallyLocateWithAddressUpdateOrder(data: FormData) {
     data,
   );
 }
+
+export type UpdateOrderRes = {
+  ok: boolean;
+  error?: string;
+}
+export function updateOrder(data: FormData) {
+  return apiV1client.patch<ManualLocateRes>("/api/v1/orders", data);
+}

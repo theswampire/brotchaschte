@@ -1,7 +1,13 @@
 <script lang="ts">
   import { createQuery } from "@tanstack/svelte-query";
   import { api } from "@/lib/api/api";
+  import type { Order } from "@/lib/api/orders";
   import { navigate } from "sv-router/generated";
+
+  interface Props {
+    edit_order_callback: (order: Order) => void;
+  }
+  const { edit_order_callback }: Props = $props();
 
   const query = createQuery(() => ({
     queryKey: ["orders"],
@@ -31,6 +37,8 @@
           <th>#S</th>
           <th>#M</th>
           <th>#L</th>
+          <th>Lieferzeit</th>
+          <th>Bemerkungen</th>
         </tr>
       </thead>
       <tbody>
@@ -58,6 +66,8 @@
             <td>{o.amountsizeS}</td>
             <td>{o.amountsizeM}</td>
             <td>{o.amountsizeL}</td>
+            <td>{o.deliverymethod}</td>
+            <td>{o.remarks}</td>
           </tr>
         {/each}
       </tbody>
@@ -81,6 +91,8 @@
           <th>#S</th>
           <th>#M</th>
           <th>#L</th>
+          <th>Lieferzeit</th>
+          <th>Bemerkungen</th>
         </tr>
       </thead>
       <tbody>
@@ -108,6 +120,8 @@
             <td>{o.amountsizeS}</td>
             <td>{o.amountsizeM}</td>
             <td>{o.amountsizeL}</td>
+            <td>{o.deliverymethod}</td>
+            <td>{o.remarks}</td>
           </tr>
         {/each}
       </tbody>
@@ -129,6 +143,8 @@
           <th>#S</th>
           <th>#M</th>
           <th>#L</th>
+          <th>Lieferzeit</th>
+          <th>Bemerkungen</th>
         </tr>
       </thead>
       <tbody>
@@ -136,12 +152,7 @@
           <tr
             class="whitespace-nowrap even:bg-blue-200 hover:bg-blue-50 hover:even:bg-blue-100 transition-colors"
             onclick={() => {
-              navigate("/orders/:orderId/manual", {
-                params: {
-                  orderId: o.id,
-                },
-                viewTransition: true,
-              });
+              edit_order_callback(o);
             }}
           >
             <td class="block max-w-20 overflow-hidden text-ellipsis px-2 py-1"
@@ -156,6 +167,8 @@
             <td>{o.amountsizeS}</td>
             <td>{o.amountsizeM}</td>
             <td>{o.amountsizeL}</td>
+            <td>{o.deliverymethod}</td>
+            <td>{o.remarks}</td>
           </tr>
         {/each}
       </tbody>

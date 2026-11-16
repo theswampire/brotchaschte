@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v5"
 )
@@ -289,4 +290,59 @@ func (s *Server) getDeliveryOrdersSorted(c *echo.Context) error {
 		deliveries[i] = DeliveryDTO{ID: d.ID, Label: d.Label, Until: d.Until, Color: d.Color}
 	}
 	return c.JSON(http.StatusOK, &GetDeliveryOrdersRes{Ok: true, Orders: orders, Deliveries: deliveries})
+}
+
+type UpdateOrderHandlerRes struct {
+	Ok    bool   `json:"ok"`
+	Error string `json:"error"`
+}
+
+func (s *Server) updateOrderHandler(c *echo.Context) error {
+	id := c.FormValue("id")
+	lastname := c.FormValue("lastname")
+	firstname := c.FormValue("firstname")
+	phone := c.FormValue("phone")
+	email := c.FormValue("email")
+	amount_s_str := c.FormValue("amount_s")
+	amount_m_str := c.FormValue("amount_m")
+	amount_l_str := c.FormValue("amount_l")
+	address := c.FormValue("address")
+	city := c.FormValue("city")
+	postal := c.FormValue("postal")
+	delivery_method := c.FormValue("delivery_method")
+	remarks_str := c.FormValue("remarks")
+
+	amount_s, err := strconv.ParseInt(amount_s_str, 10, 64)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, &UpdateOrderHandlerRes{Ok: false, Error: "Ein Fehler ist aufgetreten. Menge ungültig."})
+	}
+	amount_m, err := strconv.ParseInt(amount_m_str, 10, 64)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, &UpdateOrderHandlerRes{Ok: false, Error: "Ein Fehler ist aufgetreten. Menge ungültig."})
+	}
+	amount_l, err := strconv.ParseInt(amount_l_str, 10, 64)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, &UpdateOrderHandlerRes{Ok: false, Error: "Ein Fehler ist aufgetreten. Menge ungültig."})
+	}
+	remarks := sql.NullString{Valid: remarks_str != "", String: remarks_str}
+
+	if err := s.orders.UpdateOrder(c.Request().Context(),
+		id,
+		lastname,
+		firstname,
+		phone,
+		email,
+		amount_s,
+		amount_m,
+		amount_l,
+		address,
+		city,
+		postal,
+		delivery_method,
+		remarks,
+	); err != nil {
+		return c.JSON(http.StatusInternalServerError, &UpdateOrderHandlerRes{Ok: false, Error: "Ein Fehler ist aufgetreten. Die veränderte Bestellung konnte nicht gespeichert werden."})
+	}
+
+	return c.JSON(http.StatusOK, &UpdateOrderHandlerRes{Ok: true})
 }

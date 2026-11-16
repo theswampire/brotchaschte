@@ -230,3 +230,56 @@ func (q *Queries) GetOrders(ctx context.Context) ([]GetOrdersRow, error) {
 	}
 	return items, nil
 }
+
+const updateOrder = `-- name: UpdateOrder :exec
+UPDATE raw_orders SET 
+    lastName = ?,
+    firstName = ?,
+    phoneNumber = ?,
+    email = ?,
+    amountSizeS = ?,
+    amountSizeM = ?,
+    amountSizeL = ?,
+    address = ?,
+    city = ?,
+    postalCode = ?,
+    deliveryMethod = ?,
+    remarks = ?
+WHERE id = ?
+RETURNING id, lastname, firstname, phonenumber, email, amountsizes, amountsizem, amountsizel, address, city, postalcode, deliverymethod, remarks, ordermethod, vendorgroup
+`
+
+type UpdateOrderParams struct {
+	Lastname       string
+	Firstname      string
+	Phonenumber    string
+	Email          string
+	Amountsizes    int64
+	Amountsizem    int64
+	Amountsizel    int64
+	Address        string
+	City           string
+	Postalcode     string
+	Deliverymethod string
+	Remarks        sql.NullString
+	ID             string
+}
+
+func (q *Queries) UpdateOrder(ctx context.Context, arg UpdateOrderParams) error {
+	_, err := q.db.ExecContext(ctx, updateOrder,
+		arg.Lastname,
+		arg.Firstname,
+		arg.Phonenumber,
+		arg.Email,
+		arg.Amountsizes,
+		arg.Amountsizem,
+		arg.Amountsizel,
+		arg.Address,
+		arg.City,
+		arg.Postalcode,
+		arg.Deliverymethod,
+		arg.Remarks,
+		arg.ID,
+	)
+	return err
+}

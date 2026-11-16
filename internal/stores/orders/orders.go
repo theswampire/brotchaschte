@@ -126,7 +126,7 @@ func (o *OrderStore) GenerateRandomOrders(ctx context.Context, n uint8) []query.
 func (o *OrderStore) SyncWithUpstream(ctx context.Context) error {
 	connString := os.Getenv("DATABASE_URL")
 	if connString == "" {
-		return fmt.Errorf("DATABASE_URL not set\n")
+		return fmt.Errorf("DATABASE_URL not set")
 	}
 	conn, err := pgx.Connect(ctx, "postgres://neondb_owner:npg_2a1IHhjTeNbw@ep-rapid-snowflake-a2qdne9k-pooler.eu-central-1.aws.neon.tech/neondb?sslmode=require")
 	if err != nil {
@@ -161,4 +161,36 @@ func (o *OrderStore) SyncWithUpstream(ctx context.Context) error {
 	}
 
 	return tx.Commit()
+}
+
+func (o *OrderStore) UpdateOrder(ctx context.Context,
+	id string,
+	lastname,
+	firstname,
+	phonenumber,
+	email string,
+	amountsizes,
+	amountsizem,
+	amountsizel int64,
+	address,
+	city,
+	postalcode,
+	deliverymethod string,
+	remarks sql.NullString,
+) error {
+	return o.queries.UpdateOrder(ctx, query.UpdateOrderParams{
+		ID:             id,
+		Lastname:       lastname,
+		Firstname:      firstname,
+		Phonenumber:    phonenumber,
+		Email:          email,
+		Amountsizes:    amountsizes,
+		Amountsizem:    amountsizem,
+		Amountsizel:    amountsizel,
+		Address:        address,
+		City:           city,
+		Postalcode:     postalcode,
+		Deliverymethod: deliverymethod,
+		Remarks:        remarks,
+	})
 }

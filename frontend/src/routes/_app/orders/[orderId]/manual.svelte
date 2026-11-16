@@ -154,7 +154,7 @@
 <section
   class="absolute right-10 top-10 bg-white p-3 rounded border border-gray-200"
 >
-  <div class="w-full flex justify-between">
+  <div class="w-full flex justify-between gap-5">
     <h1 class="font-bold text-lg">Bestellung manuell lokalisieren</h1>
     <button
       type="button"

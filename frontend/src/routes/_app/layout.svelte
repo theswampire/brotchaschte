@@ -16,7 +16,7 @@
   setMapHandleContext(map);
 </script>
 
-<nav class="w-full h-14">
+<nav class="w-full h-14 border-b border-gray-200">
   <div
     class="flex mx-auto max-w-2xl h-full w-full gap-10 items-center justify-between"
   >

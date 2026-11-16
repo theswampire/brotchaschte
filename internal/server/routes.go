@@ -40,6 +40,7 @@ func (s *Server) registerApiV1Routes(e *echo.Echo) {
 	orders := router.Group("/orders")
 	orders.Use(s.requireSession)
 	orders.GET("", s.getOrdersHandler)
+	orders.PATCH("", s.updateOrderHandler)
 	orders.POST("/generate", s.generateRandomOrdersHandler)
 	orders.POST("/geolocate", s.geolocateOrdersHandler)
 	orders.PATCH("/geolocate", s.manualLocateHandler)

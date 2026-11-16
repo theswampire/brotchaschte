@@ -24,3 +24,21 @@ FROM raw_orders) AS agg;
 INSERT INTO raw_orders (id, lastName, firstName, phoneNumber, email, amountSizeS, amountSizeM, amountSizeL, address, city, postalCode, deliveryMethod, remarks, orderMethod, vendorGroup) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
     ON CONFLICT(id)
     DO NOTHING;
+
+-- name: UpdateOrder :exec
+UPDATE raw_orders SET 
+    lastName = ?,
+    firstName = ?,
+    phoneNumber = ?,
+    email = ?,
+    amountSizeS = ?,
+    amountSizeM = ?,
+    amountSizeL = ?,
+    address = ?,
+    city = ?,
+    postalCode = ?,
+    deliveryMethod = ?,
+    remarks = ?
+WHERE id = ?
+RETURNING *
+;
