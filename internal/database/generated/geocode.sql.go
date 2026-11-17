@@ -489,7 +489,7 @@ func (q *Queries) ManualGeocode(ctx context.Context, arg ManualGeocodeParams) (O
 }
 
 const updateAddress = `-- name: UpdateAddress :one
-UPDATE raw_orders SET address = ?, postalCode = ?, city = ?
+UPDATE raw_orders SET address = ?, postalCode = ?, city = ?, remarks = ?
 WHERE id = ?
 RETURNING id, lastname, firstname, phonenumber, email, amountsizes, amountsizem, amountsizel, address, city, postalcode, deliverymethod, remarks, ordermethod, vendorgroup
 `
@@ -498,6 +498,7 @@ type UpdateAddressParams struct {
 	Address    string
 	Postalcode string
 	City       string
+	Remarks    sql.NullString
 	ID         string
 }
 
@@ -506,6 +507,7 @@ func (q *Queries) UpdateAddress(ctx context.Context, arg UpdateAddressParams) (R
 		arg.Address,
 		arg.Postalcode,
 		arg.City,
+		arg.Remarks,
 		arg.ID,
 	)
 	var i RawOrder

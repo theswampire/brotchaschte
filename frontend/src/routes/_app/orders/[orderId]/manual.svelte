@@ -178,7 +178,7 @@
         name="address"
         type="text"
         defaultvalue={query.data.data.order.address}
-        onchange={() => (changed = true)}
+        oninput={() => (changed = true)}
       />
       <label for="postalcode" class="font-bold text-sm">Postleitzahl</label>
       <input
@@ -187,17 +187,25 @@
         name="postalcode"
         type="text"
         defaultvalue={query.data.data.order.postalcode}
-        onchange={() => (changed = true)}
+        oninput={() => (changed = true)}
       />
       <label for="city" class="font-bold text-sm">Ort</label>
       <input
         id="city"
-        class="border rounded py-1 px-2 border-gray-200"
+        class="border rounded py-1 px-2 border-gray-200 mb-2"
         name="city"
         type="text"
         defaultvalue={query.data.data.order.city}
-        onchange={() => (changed = true)}
+        oninput={() => (changed = true)}
       />
+      <label for="remarks" class="font-bold text-sm">Bemerkung</label>
+      <textarea
+        id="remarks"
+        class="border rounded py-1 px-2 border-gray-200"
+        name="remarks"
+        defaultvalue={query.data.data.order.remarks}
+        oninput={() => (changed = true)}></textarea>
+
       {#if query.data.data.order.suggested_label}
         <div class="mt-5">
           <p>

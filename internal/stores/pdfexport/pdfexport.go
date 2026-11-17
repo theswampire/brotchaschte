@@ -36,8 +36,8 @@ func (p *PDFExportStore) DeliveryRuns(ctx context.Context, w io.Writer) error {
 		return fmt.Errorf("get ordered orders: %w", err)
 	}
 
-	header := [...]string{"300g", "500g", "1kg", "Zeit", "Nachname", "Vorname", "Adresse", "Bemerkung"}
-	column_widths := [...]float64{10, 10, 10, 13, 30, 25, 100, 95}
+	header := [...]string{"x", "300g", "500g", "1kg", "Zeit", "Bestellung", "Nachname", "Vorname", "Adresse", "Bemerkung"}
+	column_widths := [...]float64{6, 10, 10, 10, 13, 23, 30, 25, 80, 80}
 	wSum := 0.0
 	for _, v := range column_widths {
 		wSum += v
@@ -118,14 +118,16 @@ func (p *PDFExportStore) DeliveryRuns(ctx context.Context, w io.Writer) error {
 
 		address := pkg.MaybeFromSQL[string](order.GeocodedAddress)
 
-		pdf.CellFormat(column_widths[0], 6, formatAmount(order.Amountsizes), "BL", 0, "", fill, 0, "")
-		pdf.CellFormat(column_widths[1], 6, formatAmount(order.Amountsizem), "BL", 0, "", fill, 0, "")
-		pdf.CellFormat(column_widths[2], 6, formatAmount(order.Amountsizel), "BL", 0, "", fill, 0, "")
-		pdf.CellFormat(column_widths[3], 6, order.Deliverymethod, "BL", 0, "R", fill, 0, "")
-		pdf.CellFormat(column_widths[4], 6, order.Lastname, "BL", 0, "", fill, 0, "")
-		pdf.CellFormat(column_widths[5], 6, order.Firstname, "BL", 0, "", fill, 0, "")
-		pdf.CellFormat(column_widths[6], 6, address.Default(fmt.Sprintf("%s %s %s", order.Address, order.Postalcode, order.City)), "BL", 0, "", fill, 0, "")
-		pdf.MultiCell(column_widths[7], 6, strings.TrimRight(order.Remarks.String, "\r\n"), "BLR", "", fill)
+		pdf.CellFormat(column_widths[0], 6, "", "BL", 0, "", fill, 0, "")
+		pdf.CellFormat(column_widths[1], 6, formatAmount(order.Amountsizes), "BL", 0, "", fill, 0, "")
+		pdf.CellFormat(column_widths[2], 6, formatAmount(order.Amountsizem), "BL", 0, "", fill, 0, "")
+		pdf.CellFormat(column_widths[3], 6, formatAmount(order.Amountsizel), "BL", 0, "", fill, 0, "")
+		pdf.CellFormat(column_widths[4], 6, order.Deliverymethod, "BL", 0, "R", fill, 0, "")
+		pdf.CellFormat(column_widths[5], 6, order.Ordermethod.String, "BL", 0, "", fill, 0, "")
+		pdf.CellFormat(column_widths[6], 6, order.Lastname, "BL", 0, "", fill, 0, "")
+		pdf.CellFormat(column_widths[7], 6, order.Firstname, "BL", 0, "", fill, 0, "")
+		pdf.CellFormat(column_widths[8], 6, address.Default(fmt.Sprintf("%s %s %s", order.Address, order.Postalcode, order.City)), "BL", 0, "", fill, 0, "")
+		pdf.MultiCell(column_widths[9], 6, strings.TrimRight(order.Remarks.String, "\r\n"), "BLR", "", fill)
 
 		//pdf.Ln(-1)
 	}

@@ -54,6 +54,7 @@ func (s *Server) manualLocateWithAddressUpdateHandler(c *echo.Context) error {
 	address := c.FormValue("address")
 	postalcode := c.FormValue("postalcode")
 	city := c.FormValue("city")
+	remarks := c.FormValue("remarks")
 
 	northing, err := strconv.ParseFloat(northing_str, 64)
 	if err != nil {
@@ -63,7 +64,7 @@ func (s *Server) manualLocateWithAddressUpdateHandler(c *echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, &ManualLocateRes{Ok: false, Error: "Ein Fehler ist aufgetreten. Ungültige Koordinate."})
 	}
-	_, err = s.geocode.ManuallyLocateAndUpdateAddressOrder(c.Request().Context(), order_id, address, postalcode, city, northing, easting)
+	_, err = s.geocode.ManuallyLocateAndUpdateAddressOrder(c.Request().Context(), order_id, address, postalcode, city, remarks, northing, easting)
 	if err != nil {
 		log.Println(err.Error())
 		return c.JSON(http.StatusInternalServerError, &ManualLocateRes{Ok: false, Error: "Ein Fehler ist aufgetreten. Die Koordinaten konnten nicht gespeichert werden."})

@@ -5,6 +5,8 @@
   import Clock from "@/lib/icons/movingicons/clock.svelte";
   import Pencil from "@/lib/icons/movingicons/pencil.svelte";
   import X from "@/lib/icons/movingicons/x.svelte";
+  import { toLngLat, type Coords } from "@/lib/map/coords";
+  import { getMapHandleContext } from "@/lib/map/mapcontext";
   import { getMarkerStoreContext } from "@/lib/map/markerstore.svelte";
   import { createMutation, createQuery } from "@tanstack/svelte-query";
   import { navigate, route } from "sv-router/generated";
@@ -33,6 +35,8 @@
   const deselected_orders = new Set<string>();
   let changed = $state(false);
   let open_edit_dialog = $state(false);
+
+  const map = getMapHandleContext();
 
   const markers = getMarkerStoreContext();
   markers.setToDeliveryEditMode(deliveryId);
@@ -68,6 +72,18 @@
     if (!query.isSuccess || lastsuccess >= query.dataUpdatedAt) return;
     lastsuccess = query.dataUpdatedAt;
     orders = query.data.data.orders;
+
+    // flyto delivery group
+    const center_point: Coords = [0, 0];
+    const deli_orders = markers.getOrdersForDelivery(deliveryId); // TODO: why need query when this exists?
+    if (deli_orders.length === 0) return;
+    for (const order of deli_orders) {
+      center_point[0] += order.y;
+      center_point[1] += order.x;
+    }
+    center_point[0] /= deli_orders.length;
+    center_point[1] /= deli_orders.length;
+    map.instance?.flyTo({ center: toLngLat(center_point), zoom: 18 });
   });
 
   let timefilter = $state<"early" | "late" | "both">("both");

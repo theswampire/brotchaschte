@@ -96,10 +96,18 @@
 
 {#if hoverstate.show}
   <div
-    class="absolute bg-white p-4 z-10 -translate-x-1/2 -translate-y-52 rounded shadow border border-gray-200 text-base flex flex-col"
+    class="absolute bg-white p-4 z-10 -translate-x-1/2 -translate-y-62 rounded shadow border border-gray-200 text-base flex flex-col"
     style:top={`${hoverstate.coords[1]}px`}
     style:left={`${hoverstate.coords[0]}px`}
   >
+    {#if hoverstate.marker?.delivery_id}
+      <span class="font-bold text-xs"
+        >Liefertour {hoverstate.marker?.delivery_id}</span
+      >
+    {:else}
+      <span class="font-bold text-xs">keine Liefertour</span>
+    {/if}
+
     <div class="flex gap-3 items-center justify-between">
       <div
         class="rounded-full border border-gray-600 px-1.5 flex items-center gap-1 h-fit w-fit data-[time=early]:border-red-500 data-[time=early]:text-red-600"

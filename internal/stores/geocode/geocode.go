@@ -110,7 +110,7 @@ func (g *GeocodeStore) GetGeocodedOrders(ctx context.Context) ([]query.GetGeocod
 	return g.queries.GetGeocodedOrders(ctx)
 }
 
-func (g *GeocodeStore) UpdateAddress(ctx context.Context, order_id, address, zip, city string) (query.RawOrder, error) {
+func (g *GeocodeStore) UpdateAddress(ctx context.Context, order_id, address, zip, city, remarks string) (query.RawOrder, error) {
 	tx, err := g.db.BeginTx(ctx, nil)
 	if err != nil {
 		log.Println("failed to obtain db transaction for updating address")
@@ -119,7 +119,7 @@ func (g *GeocodeStore) UpdateAddress(ctx context.Context, order_id, address, zip
 	defer tx.Rollback()
 	q := g.queries.WithTx(tx)
 
-	order, err := q.UpdateAddress(ctx, query.UpdateAddressParams{ID: order_id, Address: address, Postalcode: zip, City: city})
+	order, err := q.UpdateAddress(ctx, query.UpdateAddressParams{ID: order_id, Address: address, Postalcode: zip, City: city, Remarks: sql.NullString{Valid: remarks != "", String: remarks}})
 	if err != nil {
 		return query.RawOrder{}, err
 	}
@@ -151,7 +151,7 @@ func (g *GeocodeStore) ManuallyLocateOrder(ctx context.Context, order_id string,
 	return ordercoord, tx.Commit()
 }
 
-func (g *GeocodeStore) ManuallyLocateAndUpdateAddressOrder(ctx context.Context, order_id, address, postalcode, city string, northing, easting float64) (query.OrderCoordinate, error) {
+func (g *GeocodeStore) ManuallyLocateAndUpdateAddressOrder(ctx context.Context, order_id, address, postalcode, city, remarks string, northing, easting float64) (query.OrderCoordinate, error) {
 	tx, err := g.db.BeginTx(ctx, nil)
 	if err != nil {
 		log.Println("failed to obtain db transaction for geocoding")
@@ -160,7 +160,7 @@ func (g *GeocodeStore) ManuallyLocateAndUpdateAddressOrder(ctx context.Context, 
 	defer tx.Rollback()
 	q := g.queries.WithTx(tx)
 
-	_, err = q.UpdateAddress(ctx, query.UpdateAddressParams{ID: order_id, Address: address, Postalcode: postalcode, City: city})
+	_, err = q.UpdateAddress(ctx, query.UpdateAddressParams{ID: order_id, Address: address, Postalcode: postalcode, City: city, Remarks: sql.NullString{Valid: remarks != "", String: remarks}})
 	if err != nil {
 		return query.OrderCoordinate{}, err
 	}

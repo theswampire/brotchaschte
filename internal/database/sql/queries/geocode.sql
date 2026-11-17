@@ -72,6 +72,6 @@ DO
 RETURNING *;
 
 -- name: UpdateAddress :one
-UPDATE raw_orders SET address = ?, postalCode = ?, city = ?
+UPDATE raw_orders SET address = ?, postalCode = ?, city = ?, remarks = ?
 WHERE id = ?
 RETURNING *;

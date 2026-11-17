@@ -8,7 +8,3 @@
 	markers.restoreChanges();
 </script>
 
-<section
-	class="absolute inset-0 pointer-events-none h-full flex flex-col justify-center"
->
-</section>
