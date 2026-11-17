@@ -130,27 +130,32 @@
         <option value="late">10 Uhr</option>
       </select>
     </div>
-    <button
-      type="button"
-      onclick={() => navigate("/deliveries", { viewTransition: true })}
-      ><X /></button
-    >
+    <div class="flex items-center h-12 gap-14">
+      <button
+        type="button"
+        disabled={assignOrdersMutation.isPending || !changed}
+        class="border rounded p-1 border-gray-300  shadow hover:shadow-none transition-shadow disabled:bg-gray-200 disabled:text-gray-600 disabled:shadow-none"
+        onclick={() => {
+          console.log("start saving");
+          assignOrdersMutation.mutate({
+            delivery_id: deliveryId,
+            selected_orders: orders.map((o) => o.id),
+            deselected_orders: Array.from(deselected_orders),
+          });
+        }}>
+
+        {#if changed}
+        *
+        {/if}
+        Speichern</button
+      >
+      <button
+        type="button"
+        onclick={() => navigate("/deliveries", { viewTransition: true })}
+        ><X /></button
+      >
+    </div>
   </div>
-  {#if changed}
-    <button
-      type="button"
-      disabled={assignOrdersMutation.isPending}
-      class="border rounded p-1 border-gray-200 shadow hover:shadow-none transition-shadow disabled:bg-gray-300"
-      onclick={() => {
-        console.log("start saving");
-        assignOrdersMutation.mutate({
-          delivery_id: deliveryId,
-          selected_orders: orders.map((o) => o.id),
-          deselected_orders: Array.from(deselected_orders),
-        });
-      }}>Speichern</button
-    >
-  {/if}
   {#if !orders}
     Lädt...
   {/if}
