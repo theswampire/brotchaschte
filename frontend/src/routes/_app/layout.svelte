@@ -20,6 +20,10 @@
   <div
     class="flex mx-auto max-w-2xl h-full w-full gap-10 items-center justify-between"
   >
+    <span
+      class="text-xl font-black text-center pointer-events-auto text-white text-shadow-amber-600 text-shadow-md"
+      >Brotchaschte</span
+    >
     <a href={p("/")} data-view-transition>Karte</a>
     <a href={p("/orders")} data-view-transition>Bestellungen</a>
     <a href={p("/deliveries")} data-view-transition>Liefertouren</a>

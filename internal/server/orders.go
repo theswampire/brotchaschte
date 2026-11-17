@@ -239,7 +239,7 @@ func (s *Server) pullFromUpstreamHandler(c *echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, &GetOrdersResponse{Ok: false, Error: "Ein Fehler ist aufgetreten. Bestellungen konnten nicht importiert werden."})
 	}
 
-	return c.JSON(http.StatusInternalServerError, &GetOrdersResponse{Ok: true})
+	return c.JSON(http.StatusOK, &GetOrdersResponse{Ok: true})
 }
 
 type GetDeliveryOrdersRes struct {

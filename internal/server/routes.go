@@ -56,4 +56,8 @@ func (s *Server) registerApiV1Routes(e *echo.Echo) {
 	deliveries.PATCH("", s.editDeliveryHandler)
 	deliveries.GET("/all", s.getDeliveriesHandler)
 	deliveries.POST("/assign", s.assignOrdersHandler)
+
+	exports := router.Group("/export")
+	exports.Use(s.requireSession)
+	exports.GET("/deliveries", s.exportDeliveriesToPDFHandler)
 }

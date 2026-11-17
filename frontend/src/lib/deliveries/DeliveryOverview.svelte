@@ -25,7 +25,18 @@
 >
   <h2 class="font-bold text-3xl">Lieferungen</h2>
 
-  <CreateDeliveryForm />
+  <div class="py-5 flex gap-2">
+    <CreateDeliveryForm />
+    <div>
+      <h2 class="font-bold">Exportieren</h2>
+      <a
+        target="_blank"
+        href="/api/v1/export/deliveries?download=true"
+        class="border rounded p-1 border-gray-200 shadow hover:shadow-none transition-shadow"
+        >PDF exportieren</a
+      >
+    </div>
+  </div>
 
   {#if query.isPending}
     <p>Lädt...</p>

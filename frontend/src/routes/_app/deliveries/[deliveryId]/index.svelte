@@ -69,6 +69,8 @@
     lastsuccess = query.dataUpdatedAt;
     orders = query.data.data.orders;
   });
+
+  let timefilter = $state<"early" | "late" | "both">("both");
 </script>
 
 <section
@@ -96,6 +98,21 @@
           open_edit_dialog = true;
         }}><Pencil size={16} /></button
       >
+
+      <label for="timefilter" class="ml-10">Filter:</label>
+      <select
+        id="timefilter"
+        bind:value={timefilter}
+        defaultValue="both"
+        class="border rounded py-1 px-2 border-gray-200"
+        onchange={() => {
+          markers.filterForDeliveryTime(timefilter);
+        }}
+      >
+        <option value="both">Alles</option>
+        <option value="early">8 Uhr</option>
+        <option value="late">10 Uhr</option>
+      </select>
     </div>
     <button
       type="button"

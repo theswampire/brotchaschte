@@ -3,7 +3,7 @@
   import Dialog from "@/lib/Dialog.svelte";
   import X from "@/lib/icons/movingicons/x.svelte";
   import EditOrdersForm from "@/lib/orders/EditOrdersForm.svelte";
-  import GenerateOrdersButton from "@/lib/orders/GenerateOrdersButton.svelte";
+  //import GenerateOrdersButton from "@/lib/orders/GenerateOrdersButton.svelte";
   import GeocodeOrdersButton from "@/lib/orders/GeocodeOrdersButton.svelte";
   import OrdersTable from "@/lib/orders/OrdersTable.svelte";
   import SyncButton from "@/lib/orders/SyncButton.svelte";
@@ -39,7 +39,7 @@
 >
   <div class="flex justify-between">
     <h1 class="font-bold text-3xl">Bestellungen</h1>
-    <GenerateOrdersButton />
+    <!-- <GenerateOrdersButton /> -->
     <GeocodeOrdersButton />
     <SyncButton />
   </div>

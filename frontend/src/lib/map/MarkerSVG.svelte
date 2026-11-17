@@ -1,11 +1,18 @@
 <script lang="ts">
   interface Props {
     color: string;
+    hidden?: boolean;
   }
-  const { color }: Props = $props();
+  const { color, hidden }: Props = $props();
 </script>
 
-<svg display="block" height="57px" width="27px" viewBox="0 -5 27 42"
+<svg
+  display="block"
+  height="57px"
+  width="27px"
+  viewBox="0 -5 27 42"
+  class="data-[hidden=true]:hidden"
+  data-hidden={hidden}
   ><g fill-rule="nonzero" transform="translate(0, -5)">
     <g transform="translate(3.0, 35.0)" fill="#000000"
       ><ellipse

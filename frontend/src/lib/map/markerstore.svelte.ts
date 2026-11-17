@@ -14,7 +14,7 @@ type Color = string;
 
 type MarkerViewMode = "group-overview" | "delivery" | "manual";
 
-type MarkerEntry = {
+export type MarkerEntry = {
   order: GeocodedOrder;
   delivery_id?: DeliveryId;
   color: Color;
@@ -369,6 +369,24 @@ export class MarkerStore {
       orders.push(marker.order);
     }
     return orders;
+  }
+
+  public filterForDeliveryTime(time: "early" | "late" | "both") {
+    for (const order of this.markers.values()) {
+      let visible: boolean;
+      switch (time) {
+        case "early":
+          visible = order.order.deliverymethod === "8 Uhr";
+          break;
+        case "late":
+          visible = order.order.deliverymethod === "10 Uhr";
+          break;
+        case "both":
+          visible = true;
+          break;
+      }
+      this.markers.set(order.order.id, { ...order, visible });
+    }
   }
 }
 
