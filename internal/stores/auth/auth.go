@@ -28,6 +28,10 @@ type AuthService interface {
 	SessionManager() *scs.SessionManager
 	AuthenticateUser(ctx context.Context, email, password string) (bool, error)
 	GetUser(ctx context.Context) email
+	GetUsers(ctx context.Context) ([]query.User, error)
+	DeleteUser(ctx context.Context, email string) error
+	CreateUser(ctx context.Context, email, password string) error
+	UpdateUserPassword(ctx context.Context, email, password string) error
 }
 
 type authservice struct {
@@ -136,6 +140,40 @@ func (s *authservice) CreateUser(ctx context.Context, email, password string) er
 
 	return tx.Commit()
 
+}
+
+func (s *authservice) GetUsers(ctx context.Context) ([]query.User, error) {
+	return s.queries.GetUsers(ctx)
+}
+
+func (s *authservice) DeleteUser(ctx context.Context, email string) error {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		log.Println("failed to obtain db transaction to delete user")
+		return err
+	}
+	defer tx.Rollback()
+	q := s.queries.WithTx(tx)
+
+	_, err = q.GetUser(ctx, email)
+	if err != nil {
+		return err
+	}
+	count, err := q.GetUserCount(ctx)
+	if err != nil {
+		return err
+	}
+	if count <= 1 {
+		return errors.New("cannot delete last user")
+	}
+	if err := q.DeleteUser(ctx, email); err != nil {
+		return err;
+	}
+	return tx.Commit();
+}
+
+func (s *authservice) UpdateUserPassword(ctx context.Context, email, password string) error {
+	return s.queries.UpdatePassword(ctx, query.UpdatePasswordParams{Email: email, PasswordHash: s.HashPassword(password)})
 }
 
 func (s *authservice) HashPassword(password string) string {

@@ -3,6 +3,7 @@ package server
 import (
 	"brotchaschte2/frontend"
 	"net/http"
+	"os"
 
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
@@ -33,15 +34,20 @@ func (s *Server) registerApiV1Routes(e *echo.Echo) {
 	auth.Any("/logout", s.logoutHandler)
 	auth.Any("/check", s.checkAuthenticatedHandler)
 
-	kek := router.Group("/kek")
-	kek.Use(s.requireSession)
-	kek.Any("", s.kekHandler)
+	users := router.Group("/users")
+	users.Use(s.requireSession)
+	users.GET("", s.getUsersHandler)
+	users.POST("", s.createUserHandler)
+	users.PATCH("", s.updatePasswordHandler)
+	users.DELETE("", s.deleteUserHandler)
 
 	orders := router.Group("/orders")
 	orders.Use(s.requireSession)
 	orders.GET("", s.getOrdersHandler)
 	orders.PATCH("", s.updateOrderHandler)
-	orders.POST("/generate", s.generateRandomOrdersHandler)
+	if os.Getenv("ENABLE_RANDOM_ORDERS") == "1" {
+		orders.POST("/generate", s.generateRandomOrdersHandler)
+	}
 	orders.POST("/geolocate", s.geolocateOrdersHandler)
 	orders.PATCH("/geolocate", s.manualLocateHandler)
 	orders.PATCH("/geolocate/update_address", s.manualLocateWithAddressUpdateHandler)

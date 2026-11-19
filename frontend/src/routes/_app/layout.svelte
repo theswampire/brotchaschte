@@ -27,6 +27,7 @@
     <a href={p("/")} data-view-transition>Karte</a>
     <a href={p("/orders")} data-view-transition>Bestellungen</a>
     <a href={p("/deliveries")} data-view-transition>Liefertouren</a>
+    <a href={p("/users")} data-view-transition>Einstellungen</a>
     <LogoutButton />
   </div>
 </nav>

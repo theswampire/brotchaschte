@@ -24,6 +24,15 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
 	return err
 }
 
+const deleteUser = `-- name: DeleteUser :exec
+DELETE FROM user WHERE email = ?
+`
+
+func (q *Queries) DeleteUser(ctx context.Context, email string) error {
+	_, err := q.db.ExecContext(ctx, deleteUser, email)
+	return err
+}
+
 const getUser = `-- name: GetUser :one
 SELECT email, password_hash FROM user
 WHERE email = ? LIMIT 1
@@ -34,6 +43,17 @@ func (q *Queries) GetUser(ctx context.Context, email string) (User, error) {
 	var i User
 	err := row.Scan(&i.Email, &i.PasswordHash)
 	return i, err
+}
+
+const getUserCount = `-- name: GetUserCount :one
+SELECT COUNT(*) FROM user
+`
+
+func (q *Queries) GetUserCount(ctx context.Context) (int64, error) {
+	row := q.db.QueryRowContext(ctx, getUserCount)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
 }
 
 const getUsers = `-- name: GetUsers :many
@@ -61,4 +81,19 @@ func (q *Queries) GetUsers(ctx context.Context) ([]User, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const updatePassword = `-- name: UpdatePassword :exec
+UPDATE user SET password_hash = ?
+WHERE email = ?
+`
+
+type UpdatePasswordParams struct {
+	PasswordHash string
+	Email        string
+}
+
+func (q *Queries) UpdatePassword(ctx context.Context, arg UpdatePasswordParams) error {
+	_, err := q.db.ExecContext(ctx, updatePassword, arg.PasswordHash, arg.Email)
+	return err
 }
