@@ -73,6 +73,8 @@
         onmouseleave={() => {
           hoverstate.show = false;
         }}
+        style:transform-origin="bottom center"
+        style:transform="rotate({m.rotation ?? 0}deg)"
       >
         <MarkerSVG color={m.color} hidden={!m.visible} />
       </div>

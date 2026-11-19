@@ -19,6 +19,7 @@ export type MarkerEntry = {
   delivery_id?: DeliveryId;
   color: Color;
   visible: boolean;
+  rotation?: number;
 };
 
 type RestoreLogElement =
@@ -157,6 +158,20 @@ export class MarkerStore {
         order,
         visible,
       });
+    }
+
+    const overlaps = this.checkOverlaps();
+    console.log(`found ${overlaps.length} overlaps`);
+    for (const overlap of overlaps) {
+      const rotation_unit = 33;
+      let rotation = (-(overlap.size - 1) / 2) * rotation_unit;
+
+      for (const id of overlap) {
+        const m = this.markers.get(id)!;
+        m.rotation = rotation;
+        rotation += rotation_unit;
+        this.markers.set(id, { ...m });
+      }
     }
   }
 
@@ -387,6 +402,46 @@ export class MarkerStore {
       }
       this.markers.set(order.order.id, { ...order, visible });
     }
+  }
+
+  private checkOverlaps(): Set<OrderId>[] {
+    // rather have some false positives!
+    const DISTANCE = 8;
+    const adj_map = new Map<OrderId, Set<OrderId>>();
+    // compute distance
+    // n squared babyy
+    for (const [id1, m1] of this.markers.entries()) {
+      for (const [id2, m2] of this.markers.entries()) {
+        if (id1 === id2) {
+          continue;
+        }
+
+        const distance =
+          (m1.order.x - m2.order.x) ** 2 + (m1.order.y - m2.order.y) ** 2;
+
+        if (distance <= DISTANCE) {
+          if (!adj_map.has(id1)) {
+            adj_map.set(id1, new Set());
+          }
+          if (!adj_map.has(id2)) {
+            adj_map.set(id2, new Set());
+          }
+          adj_map.get(id1)!.add(id1);
+          adj_map.get(id1)!.add(id2);
+          adj_map.get(id2)!.add(id1);
+          adj_map.get(id2)!.add(id2);
+        }
+      }
+    }
+
+    const overlaps: Set<OrderId>[] = [];
+    const orders = Array.from(adj_map.keys());
+    for (const order of orders) {
+      if (!adj_map.has(order)) continue;
+      overlaps.push(adj_map.get(order)!);
+      adj_map.delete(order);
+    }
+    return overlaps;
   }
 }
 
