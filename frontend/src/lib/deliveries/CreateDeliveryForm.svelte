@@ -28,6 +28,7 @@
         mutationFn: api.deliveries.createNewDelivery,
         onSuccess(data) {
             queryClient.invalidateQueries({ queryKey: ["deliveries"] });
+            queryClient.invalidateQueries({ queryKey: ["sorted-orders"] });
             const id = data.data.delivery.id;
             navigate("/deliveries/:deliveryId", {
                 params: {

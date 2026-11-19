@@ -85,6 +85,7 @@
     mutationFn: api.orders.manuallyLocateOrder,
     onSuccess() {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
+      queryClient.invalidateQueries({ queryKey: ["sorted-orders"] });
       queryClient.invalidateQueries({ queryKey: ["order", params.orderId] });
 
       navigate("/orders", { viewTransition: true });
@@ -94,6 +95,7 @@
     mutationFn: api.orders.manuallyLocateWithAddressUpdateOrder,
     onSuccess() {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
+      queryClient.invalidateQueries({ queryKey: ["sorted-orders"] });
       queryClient.invalidateQueries({ queryKey: ["order", params.orderId] });
       navigate("/orders", { viewTransition: true });
     },
