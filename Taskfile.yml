@@ -9,12 +9,18 @@ tasks:
     cmds:
       - task: dev
 
+  check-zig-installed:
+    cmds:
+      - defer:
+          echo '{{if .EXIT_CODE}}Zig is not installed{{else}}Zig is installed{{end}}'
+      - command -v zig
+
   install-deps-frontend:
     dir: frontend
     run: once
     cmds:
-      - pnpm install --frozen-lockfile
-    
+      - pnpm install --frozen-lockfile 
+
 
   build-frontend:
     deps: [ install-deps-frontend ]
@@ -36,7 +42,6 @@ tasks:
         - name: BUILD_FLAGS
     env:
       CGO_ENABLED: 1
-      #GOOS: linux
     cmds:
       - sqlc generate
       - go build -o {{.EXECUTABLE_FILE}} {{.BUILD_FLAGS}} cmd/server/main.go
@@ -77,6 +82,19 @@ tasks:
       - task: _build-backend
         vars: { FRONTEND: 'bundle' }
 
+
+  build-arm:
+    desc: Build backend in bundled mode for Arm
+    deps: [ check-zig-installed, build-frontend ] 
+    failfast: true
+    env:
+      CGO_ENABLED: 1
+      CC: "zig cc -target aarch64-linux-musl" 
+      GOOS: linux
+      GOARCH: arm64 
+    cmds:
+      - task: _build-backend
+        vars: { FRONTEND: 'bundle' }
 
   build-dev:
     desc: Build backend in proxy mode
