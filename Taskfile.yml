@@ -42,9 +42,12 @@ tasks:
         - name: BUILD_FLAGS
     env:
       CGO_ENABLED: 1
+      CC: '{{.CC}}' 
+      GOOS: '{{.GOOS}}'  
+      GOARCH: '{{.GOARCH}}'  
     cmds:
       - sqlc generate
-      - go build -o {{.EXECUTABLE_FILE}} {{.BUILD_FLAGS}} cmd/server/main.go
+      - CC="{{.CC}}" go build -o {{.EXECUTABLE_FILE}} {{.BUILD_FLAGS}} cmd/server/main.go
     generates:
       - '{{.EXECUTABLE_FILE}}'
 
@@ -52,13 +55,21 @@ tasks:
     internal: true
     cmds:
       - task: build-backend
-        vars: { BUILD_FLAGS: "--tags=bundle" }
+        vars:
+          BUILD_FLAGS: '--tags=bundle'
+          CC: '{{.CC}}' 
+          GOOS: '{{.GOOS}}'  
+          GOARCH: '{{.GOARCH}}'  
 
   build-proxied-backend:
     internal: true
     cmds:
       - task: build-backend
-        vars: { BUILD_FLAGS: "" }
+        vars: 
+          BUILD_FLAGS: "" 
+          CC: '{{.CC}}' 
+          GOOS: '{{.GOOS}}'  
+          GOARCH: '{{.GOARCH}}'  
 
   _build-backend:
     requires:
@@ -71,8 +82,16 @@ tasks:
     cmds:
       - task: build-bundled-backend
         if: '{{ eq .FRONTEND "bundle" }}'
+        vars:
+          CC: '{{.CC}}' 
+          GOOS: '{{.GOOS}}'  
+          GOARCH: '{{.GOARCH}}'  
       - task: build-proxied-backend
         if: '{{ eq .FRONTEND "proxy" }}'
+        vars:
+          CC: '{{.CC}}' 
+          GOOS: '{{.GOOS}}'  
+          GOARCH: '{{.GOARCH}}'  
 
 
   build:
@@ -87,14 +106,13 @@ tasks:
     desc: Build backend in bundled mode for Arm
     deps: [ check-zig-installed, build-frontend ] 
     failfast: true
-    env:
-      CGO_ENABLED: 1
-      CC: "zig cc -target aarch64-linux-musl" 
-      GOOS: linux
-      GOARCH: arm64 
     cmds:
       - task: _build-backend
-        vars: { FRONTEND: 'bundle' }
+        vars: 
+          FRONTEND: 'bundle' 
+          CC: 'zig cc -target aarch64-linux-musl' 
+          GOOS: linux
+          GOARCH: arm64 
 
   build-dev:
     desc: Build backend in proxy mode
