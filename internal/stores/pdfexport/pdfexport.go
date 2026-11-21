@@ -3,7 +3,6 @@ package pdfexport
 import (
 	"brotchaschte2/internal/database"
 	query "brotchaschte2/internal/database/generated"
-	"brotchaschte2/pkg"
 	"context"
 	"database/sql"
 	"embed"
@@ -116,7 +115,7 @@ func (p *PDFExportStore) DeliveryRuns(ctx context.Context, w io.Writer) error {
 		pdf.SetTextColor(30, 30, 30)
 		fill := i%2 == 0
 
-		address := pkg.MaybeFromSQL[string](order.GeocodedAddress)
+		// address := pkg.MaybeFromSQL[string](order.GeocodedAddress)
 
 		pdf.CellFormat(column_widths[0], 6, "", "BL", 0, "", fill, 0, "")
 		pdf.CellFormat(column_widths[1], 6, formatAmount(order.Amountsizes), "BL", 0, "", fill, 0, "")
@@ -126,7 +125,7 @@ func (p *PDFExportStore) DeliveryRuns(ctx context.Context, w io.Writer) error {
 		pdf.CellFormat(column_widths[5], 6, order.Ordermethod.String, "BL", 0, "", fill, 0, "")
 		pdf.CellFormat(column_widths[6], 6, order.Lastname, "BL", 0, "", fill, 0, "")
 		pdf.CellFormat(column_widths[7], 6, order.Firstname, "BL", 0, "", fill, 0, "")
-		pdf.CellFormat(column_widths[8], 6, address.Default(fmt.Sprintf("%s %s %s", order.Address, order.Postalcode, order.City)), "BL", 0, "", fill, 0, "")
+		pdf.CellFormat(column_widths[8], 6, fmt.Sprintf("%s %s %s", order.Address, order.Postalcode, order.City), "BL", 0, "", fill, 0, "")
 		pdf.MultiCell(column_widths[9], 6, strings.TrimRight(order.Remarks.String, "\r\n"), "BLR", "", fill)
 
 		//pdf.Ln(-1)
