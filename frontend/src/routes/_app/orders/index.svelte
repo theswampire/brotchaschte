@@ -18,7 +18,7 @@
   }
 </script>
 
-<Dialog bind:show={show_edit_order} class="mx-auto -translate-1/2 top-1/2">
+<Dialog bind:show={show_edit_order} class="mx-auto -translate-y-1/2 top-1/2">
   <div class="bg-white">
     <div class="flex justify-between p-3 items-start">
       <div>
