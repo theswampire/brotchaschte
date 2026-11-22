@@ -9,11 +9,41 @@ tasks:
     cmds:
       - task: dev
 
-  check-zig-installed:
+  #### Requirements checks ###
+
+  _check_cmd:
+    requires:
+      vars:
+        - name: tool_cmd 
     cmds:
       - defer:
-          echo '{{if .EXIT_CODE}}Zig is not installed{{else}}Zig is installed{{end}}'
-      - command -v zig
+          echo '{{if .EXIT_CODE}}{{.tool_cmd}} is not installed{{else}}{{.tool_cmd}} is installed{{end}}'
+      - command -v {{.tool_cmd}}
+
+  check-zig-installed:
+    once: true
+    cmds:
+      - task: _check_cmd
+        vars: { tool_cmd: zig }
+
+  check-build-tools-installed:
+    once: true
+    cmds:
+      - task: _check_cmd
+        vars: { tool_cmd: go }
+      - task: _check_cmd
+        vars: { tool_cmd: sqlc }
+      - task: _check_cmd
+        vars: { tool_cmd: pnpm }
+
+  check-dev-tools-installed:
+    once: true
+    cmds:
+      - task: _check_cmd
+        vars: { tool_cmd: air }
+
+
+  ### Frontend ###
 
   install-deps-frontend:
     dir: frontend
@@ -35,6 +65,7 @@ tasks:
       - pnpm dev
 
 
+  ### Backend ###
 
   build-backend:
     requires:
@@ -93,10 +124,12 @@ tasks:
           GOOS: '{{.GOOS}}'  
           GOARCH: '{{.GOARCH}}'  
 
+  ### General Tasks ###
 
   build:
     desc: Build backend in bundled mode
-    deps: [ build-frontend ] 
+    deps: [ check-build-tools-installed, build-frontend ] 
+    failfast: true
     cmds:
       - task: _build-backend
         vars: { FRONTEND: 'bundle' }
@@ -104,7 +137,7 @@ tasks:
 
   build-arm:
     desc: Build backend in bundled mode for Arm
-    deps: [ check-zig-installed, build-frontend ] 
+    deps: [ check-build-tools-installed, check-zig-installed, build-frontend ] 
     failfast: true
     cmds:
       - task: _build-backend
@@ -131,6 +164,7 @@ tasks:
 
   watch:
     desc: Watch backend
+    deps: [ check-dev-tools-installed ]
     cmds:
       - air
 
