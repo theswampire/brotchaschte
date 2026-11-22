@@ -128,7 +128,7 @@ func (o *OrderStore) SyncWithUpstream(ctx context.Context) error {
 	if connString == "" {
 		return fmt.Errorf("DATABASE_URL not set")
 	}
-	conn, err := pgx.Connect(ctx, "postgres://neondb_owner:npg_2a1IHhjTeNbw@ep-rapid-snowflake-a2qdne9k-pooler.eu-central-1.aws.neon.tech/neondb?sslmode=require")
+	conn, err := pgx.Connect(ctx, connString)
 	if err != nil {
 		return fmt.Errorf("sync failed: %w", err)
 	}
